@@ -1,7 +1,7 @@
 ---
 title: 关于我
 description: this is meta description
-image: "@assets/picture.jpg"
+image: "@assets/picture.webp"
 draft: false
 ---
 你好，我是 Maple，一名程序员，技术中佬，持续学习中，尤其喜欢用代码实现自己的想法。玩游戏让我放松，写代码让我兴奋——这是我生活中最舒服的两个状态。

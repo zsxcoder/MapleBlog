@@ -3,7 +3,7 @@ import { getCollection, getEntry, render } from "astro:content";
 import BaseLayout from "@components/base/BaseLayout.astro";
 import { formatDate } from "@lib/formatDate";
 import { Image } from "astro:assets";
-import defaultImage from "@assets/picture.jpg";
+import defaultImage from "@assets/picture.webp";
 import LiquidGlass from "@components/common/LiquidGlassLess.astro";
 import { slugify } from "@lib/textConverter";
 import Comment from "@components/base/Comment.astro";
@@ -232,7 +232,7 @@ const { Content } = await render(entry);
         >
           <h3 class="text-xl font-bold mb-4">评论</h3>
           <Comment />
-          
+
         </LiquidGlass>
       </div>
 

@@ -10,7 +10,7 @@ import {
 import readingTime from "@lib/readingTime";
 import { formatDate } from "@lib/formatDate";
 import { Image } from "astro:assets";
-import defaultImage from "@assets/picture.jpg";
+import defaultImage from "@assets/picture.webp";
 import LiquidGlass from "@components/common/LiquidGlassLess.astro";
 import PlaceholderImage from "@components/blog/PlaceholderImage.astro";
 
@@ -68,7 +68,7 @@ const entryDescription = description?.substring(0, descriptionLength) || "";
             </div>
         ) : (
           <div class="w-full h-full transition-all duration-500 group-hover:scale-110">
-            <PlaceholderImage 
+            <PlaceholderImage
               title={title}
               className="w-full h-full rounded-lg"
             />

@@ -14,7 +14,7 @@ draft: false
     <div class="account-avatar">
       <div class="avatar-circle">
       <img src="/assets/uploads/picture.jpg" alt="阿飞说游戏" />
-        <!-- <span class="avatar-text">@assets/picture.jpg</span> -->
+        <!-- <span class="avatar-text">@assets/picture.webp</span> -->
       </div>
     </div>
     <div class="account-details">

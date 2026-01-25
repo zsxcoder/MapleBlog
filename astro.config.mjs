@@ -19,7 +19,7 @@ const isDevelopment = NODE_ENV === 'development';
 const getSiteUrl = () => {
   switch (NODE_ENV) {
     case 'production':
-      return "https://maplezz.com"; // 请替换为您的实际域名
+      return "https://myblog.zsxcoder.top"; // 请替换为您的实际域名
     case 'development':
     case 'test':
     default:
@@ -52,13 +52,13 @@ export default defineConfig({
     prefetchAll: isProduction
   },
   integrations: [
-    react(), 
+    react(),
     tailwind({
       applyBaseStyles: false, // 使用自定义的base样式
     }),
     AutoImport({
       imports: ["@components/common/Button.astro", "@shortcodes/Accordion", "@shortcodes/Notice", "@shortcodes/Youtube", "@shortcodes/Tabs", "@shortcodes/Tab"]
-    }), 
+    }),
     mdx()
   ],
   markdown: {
@@ -83,7 +83,7 @@ export default defineConfig({
       themes: { // https://shiki.style/themes
         light: "github-light",
         dark: "github-dark-dimmed",
-      } 
+      }
     },
     extendDefaultPlugins: true
   },

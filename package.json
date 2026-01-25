@@ -15,7 +15,6 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "npm@10.8.2",
   "scripts": {
     "dev": "astro dev",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' astro build",

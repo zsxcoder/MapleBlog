@@ -36,22 +36,22 @@ export type PageType = 'blog' | 'notes';
 //网站信息
 export const SITE_INFO = {
   // 网站名称
-  NAME: 'MapleBlog',
-  SITE_NAME: 'Maple Blog',
-  SUBNAME: '一个简单的Liquid Glass风格的静态网站系统',
+  NAME: 'ZSX Blog',
+  SITE_NAME: 'ZSX Blog',
+  SUBNAME: '钟神秀的博客',
   // 网站描述
-  DESCRIPTION: 'Maple_CMS是一个简单的Liquid Glass风格的静态网站系统，用于快速搭建个人博客、技术分享、产品展示等网站。',
+  DESCRIPTION: '钟神秀的博客，在这里记录我的生活日常、踩坑记录和资源东西。',
   // 网站 URL (生产环境)
-  URL: 'http://localhost:4321',
-  AUTHOR: 'Maplezz',
+  URL: 'https://myblog.zsxcoder.top',
+  AUTHOR: '钟神秀',
   // 本地开发 URL
   DEV_URL: 'http://localhost:4321',
   LOGO_IMAGE: '/favicon/logo.png',
-  KEY_WORDS: '静态网站,静态网站系统,Maple_CMS',
+  KEY_WORDS: '静态网站,博客,钟神秀',
   GOOGLE_ANALYTICS_ID: 'G-XXXXXX',  // 需改为你自己的Google Analytics ID
   BAIDU_ANALYTICS_ID: 'XXXXXXXXXX', // 需改为你自己的百度分析ID
   // 网站初始时间（用于计算运行时长）
-  START_DATE: '2025-07-12',
+  START_DATE: '2026-01-25',
   // ICP 备案信息
   ICP: {
     NUMBER: '备案号xxxxxx',

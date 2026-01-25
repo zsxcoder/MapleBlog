@@ -5,7 +5,7 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import readingTime from "@lib/readingTime";
 import { formatDate } from "@lib/formatDate";
 import { Image } from "astro:assets";
-import defaultImage from "@assets/picture.jpg";
+import defaultImage from "@assets/picture.webp";
 import PlaceholderImage from "@components/blog/PlaceholderImage.astro";
 
 interface Props {
@@ -32,7 +32,7 @@ const entryDescription =
   class="glass-t border border-slate-300 dark:border-slate-700 h-full my-2 pl-0 rounded-[25px] overflow-hidden transition-all duration-300 group"
 >
   <div
-    class="flex flex-col h-full rounded-[25px] 
+    class="flex flex-col h-full rounded-[25px]
     hover:scale-[1.02] transition-all duration-300  hover:shadow-xl"
   >
     <!-- 特色图片展示 -->
@@ -59,7 +59,7 @@ const entryDescription =
           </>
         ) : (
           <div class="w-full h-full transition-all duration-500 ease-out group-hover:scale-105">
-            <PlaceholderImage 
+            <PlaceholderImage
               title={title}
               className="w-full h-full rounded-t-[24px]"
             />
