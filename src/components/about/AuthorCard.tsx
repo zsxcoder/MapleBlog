@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Copyright, Mail, MapPin, Link as LinkIcon, Code2, Terminal, Cpu, Compass, Send, MessageCircle } from 'lucide-react';
+import { Mail, MapPin, Link as LinkIcon, Code2, Terminal, Cpu, Compass, Send, MessageCircle } from 'lucide-react';
 
 // 模拟配置数据 - 复刻自原仓库
 const AUTHOR_PROFILE = {

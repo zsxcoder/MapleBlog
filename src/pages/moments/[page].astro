@@ -2,16 +2,6 @@
 import CollectionLayout from "@components/moments/CollectionLayout.astro";
 import { getPageSize } from "@lib/config";
 
-// 获取笔记每页显示数量
-const entriesPerPage = getPageSize('notes'); // 复用博客的分页配置
-
-// 获取当前页码
-const { page } = Astro.params;
-const currentPageIndex = parseInt(page as string) || 1;
-
-// 从API获取moments数据
-const apiUrl = "https://mm.zsxcoder.top/public/notes";
-
 // 定义类型
 interface Moment {
   id: string;
@@ -19,6 +9,52 @@ interface Moment {
   content: string;
   tags: string[];
 }
+
+// 生成所有分页路径
+export async function getStaticPaths() {
+  // 获取笔记每页显示数量
+  const entriesPerPage = getPageSize('notes'); // 复用博客的分页配置
+
+  // 从API获取moments数据
+  const apiUrl = "https://mm.zsxcoder.top/public/notes";
+
+  try {
+    const response = await fetch(apiUrl);
+    if (response.ok) {
+      const moments = await response.json() as Moment[];
+      const pageCount = Math.ceil(moments.length / entriesPerPage);
+
+      // 为每一页生成路径
+      const paths = [];
+      for (let i = 1; i <= pageCount; i++) {
+        paths.push({
+          params: { page: i.toString() },
+          props: { page: i }
+        });
+      }
+
+      return paths;
+    }
+  } catch (error) {
+    console.error("获取moments数据出错:", error);
+  }
+
+  // 默认返回第一页
+  return [{
+    params: { page: "1" },
+    props: { page: 1 }
+  }];
+}
+
+// 获取当前页码
+const { page } = Astro.props;
+const currentPageIndex = page;
+
+// 获取笔记每页显示数量
+const entriesPerPage = getPageSize('notes'); // 复用博客的分页配置
+
+// 从API获取moments数据
+const apiUrl = "https://mm.zsxcoder.top/public/notes";
 
 let moments: Moment[] = [];
 let allMomentsCount = 0;
@@ -29,14 +65,14 @@ try {
   if (response.ok) {
     moments = await response.json();
     allMomentsCount = moments.length;
-    
+
     // 提取所有标签
     const tagSet = new Set<string>();
     moments.forEach((moment: Moment) => {
       moment.tags.forEach((tag: string) => tagSet.add(tag));
     });
     tags = Array.from(tagSet);
-    
+
     // 按创建时间排序
     moments.sort((a: Moment, b: Moment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } else {

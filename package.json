@@ -17,15 +17,15 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' astro build",
-    "build:fast": "NODE_ENV=development NODE_OPTIONS='--max-old-space-size=4096' astro build",
-    "build:prod": "NODE_ENV=production NODE_OPTIONS='--max-old-space-size=4096' astro build",
+    "build": "astro build",
+    "build:fast": "astro build",
+    "build:prod": "astro build",
     "postbuild": "pagefind --site dist",
     "format": "prettier -w ./src",
     "preview": "astro preview",
     "serve": "astro preview",
     "clean": "rm -rf dist",
-    "build:analyze": "NODE_OPTIONS='--max-old-space-size=4096' astro build --verbose"
+    "build:analyze": "astro build --verbose"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

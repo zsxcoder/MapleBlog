@@ -5,13 +5,6 @@ import { getPageSize } from "@lib/config";
 // 获取笔记每页显示数量
 const entriesPerPage = getPageSize('notes'); // 复用博客的分页配置
 
-// 获取当前标签
-const { slug } = Astro.params;
-const currentTag = slug as string;
-
-// 固定为第一页
-const currentPageIndex = 1;
-
 // 定义类型
 interface Moment {
   id: string;
@@ -20,16 +13,43 @@ interface Moment {
   tags: string[];
 }
 
-// 从API获取moments数据
-const apiUrl = "https://mm.zsxcoder.top/public/notes";
+// 生成所有标签页面的静态路径
+export async function getStaticPaths() {
+  // 从API获取moments数据
+  const apiUrl = "https://mm.zsxcoder.top/public/notes";
 
-let moments: Moment[] = [];
-let filteredMoments: Moment[] = [];
-let allMomentsCount = 0;
-let tags: string[] = [];
+  // 定义内部函数获取所有标签
+  async function getAllTags(): Promise<string[]> {
+    try {
+      const response = await fetch(apiUrl);
+      if (response.ok) {
+        const moments = await response.json() as Moment[];
+        const tagSet = new Set<string>();
+        moments.forEach((moment: Moment) => {
+          moment.tags.forEach((tag: string) => tagSet.add(tag));
+        });
+        return Array.from(tagSet) as string[];
+      }
+    } catch (error) {
+      console.error("获取tags数据出错:", error);
+    }
+    return [];
+  }
 
-// 获取所有标签
+  const allTags = await getAllTags();
+
+  // 为每个标签生成路径
+  return allTags.map(tag => ({
+    params: { slug: tag },
+    props: { tag }
+  }));
+}
+
+// 定义外部函数获取所有标签
 async function getAllTags(): Promise<string[]> {
+  // 从API获取moments数据
+  const apiUrl = "https://mm.zsxcoder.top/public/notes";
+
   try {
     const response = await fetch(apiUrl);
     if (response.ok) {
@@ -46,15 +66,16 @@ async function getAllTags(): Promise<string[]> {
   return [];
 }
 
-tags = await getAllTags();
-
-// 获取当前标签的moments
+// 定义外部函数获取当前标签的moments
 async function getMomentsByTag(tag: string) {
+  // 从API获取moments数据
+  const apiUrl = "https://mm.zsxcoder.top/public/notes";
+
   try {
     const response = await fetch(apiUrl);
     if (response.ok) {
       const moments = await response.json() as Moment[];
-      const filtered = moments.filter((moment: Moment) => 
+      const filtered = moments.filter((moment: Moment) =>
         moment.tags.includes(tag)
       );
       // 按创建时间排序
@@ -75,6 +96,13 @@ async function getMomentsByTag(tag: string) {
   };
 }
 
+// 获取当前标签
+const { tag } = Astro.props;
+const currentTag = tag;
+
+// 固定为第一页
+const currentPageIndex = 1;
+
 const { moments: allMoments, filteredMoments: tagMoments, allMomentsCount: tagMomentsCount } = await getMomentsByTag(currentTag);
 
 // 计算当前页的内容（第一页）
@@ -84,6 +112,9 @@ const currentEntries = tagMoments.slice(indexOfFirstEntry, indexOfLastEntry);
 
 // 计算总页数
 const pageCount: number = Math.ceil(tagMoments.length / entriesPerPage);
+
+// 获取所有标签用于页面导航
+const tags = await getAllTags();
 
 // 处理无效标签
 if (currentTag && !tags.includes(currentTag)) {
