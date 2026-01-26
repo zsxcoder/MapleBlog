@@ -83,49 +83,14 @@ const renderedContent = await markdownify(content, isUseMarkdown);
 </LiquidGlass>
 
 <script>
+  import { initCopyButtons } from '@lib/markdownUtils';
+
   // 在DOM加载完成后初始化功能
   if (typeof window !== 'undefined') {
     // 等待DOM加载完成
     document.addEventListener('DOMContentLoaded', function() {
-      // 为所有复制按钮添加点击事件监听器
-      const copyButtons = document.querySelectorAll('.copy-code-btn');
-      copyButtons.forEach(button => {
-        button.addEventListener('click', function(this: HTMLButtonElement) {
-          const codeBlock = this.closest('.code-block-wrapper')?.querySelector('code');
-          if (!codeBlock) {
-            console.error('未找到代码块');
-            return;
-          }
-
-          const code = codeBlock.textContent || '';
-          const originalHTML = this.innerHTML;
-
-          navigator.clipboard.writeText(code).then(() => {
-            // 显示复制成功提示
-            this.innerHTML = `
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20,6 9,17 4,12"></polyline>
-              </svg>
-            `;
-            this.title = '已复制';
-
-            setTimeout(() => {
-              this.innerHTML = originalHTML;
-              this.title = '复制代码';
-            }, 2000);
-          }).catch((err) => {
-            console.error('复制失败:', err);
-            // 降级方案：选中文本
-            const range = document.createRange();
-            range.selectNode(codeBlock);
-            const selection = window.getSelection();
-            if (selection) {
-              selection.removeAllRanges();
-              selection.addRange(range);
-            }
-          });
-        });
-      });
+      // 手动初始化复制按钮功能，因为内容是动态渲染的
+      initCopyButtons();
 
       // 为所有图片添加点击事件监听器，实现灯箱功能
       const images = document.querySelectorAll('.markdown-image img');
