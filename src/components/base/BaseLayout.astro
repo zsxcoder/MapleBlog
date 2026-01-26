@@ -8,6 +8,8 @@ import Background from "@/components/base/Background.astro";
 import { Tooltips } from "astro-tooltips";
 import { SITE_INFO } from "@lib/config";
 import { isDevelopment } from "@lib/env";
+// 导入Markdown工具函数，提供copyCode等功能
+import "@lib/markdownUtils";
 
 // types for frontmatters
 export interface Props {
@@ -193,7 +195,7 @@ const customFooterCode = customSettings?.custom_footer_code || "";
       referrerpolicy="no-referrer"
       defer></script>
     <script
-      src="https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js"
+      src="https://cdn.jsdmirror.com/npm/twikoo@1.6.44/dist/twikoo.min.js"
       integrity="sha384-dZ/hSVfTPHuzXyECOYCetAvMd0cgqWxN5Fh+mwo86PV4GdU9xgQ/MNzh/YM/lotR"
       crossorigin="anonymous"
       defer></script>
@@ -230,7 +232,7 @@ const customFooterCode = customSettings?.custom_footer_code || "";
         (function() {
           var hm = document.createElement("script");
           hm.src = "https://hm.baidu.com/hm.js?${baiduAnalyticsId}";
-          var s = document.getElementsByTagName("script")[0]; 
+          var s = document.getElementsByTagName("script")[0];
           s.parentNode.insertBefore(hm, s);
         })();
       `}

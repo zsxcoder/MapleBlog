@@ -1,0 +1,200 @@
+---
+import { FaRegCalendarAlt, FaMapMarkerAlt, FaSmile } from "react-icons/fa";
+import { formatDate } from "@lib/formatDate";
+import LiquidGlass from "@components/common/LiquidGlassLess.astro";
+import { markdownify } from "@lib/textConverter";
+
+interface Props {
+  moment: {
+    id: string;
+    createdAt: string;
+    message: string;
+    tags: string[];
+    isUseMarkdown?: boolean;
+  };
+}
+
+const { moment }: Props = Astro.props;
+const { createdAt, message, tags, isUseMarkdown = false } = moment;
+const content = message;
+
+const entryDate = createdAt ? formatDate(new Date(createdAt)) : null;
+
+// 根据isUseMarkdown字段决定是否处理Markdown内容
+const renderedContent = await markdownify(content, isUseMarkdown);
+
+---
+
+<LiquidGlass
+  heavy
+  wrapperClass="dock rounded-lg my-4 pl-0 bg-gradient-to-br gradient shadow-lg hover:shadow-xl hover:scale-[1.01]"
+  textClass="h-full"
+  animation="fadeRight"
+>
+  <div class="p-4">
+    <!-- 作者信息和发布时间 -->
+    <div class="flex items-center mb-4">
+      <div
+        class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700"
+      >
+        <!-- 使用默认头像 -->
+        <img
+          src="https://home.zsxcoder.top/api/avatar.png"
+          alt="钟神秀"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      <div class="ml-3">
+        <h4 class="font-bold">钟神秀</h4>
+        <div class="flex items-center text-xs text-gray-700 dark:text-gray-400">
+          {entryDate && (
+            <span class="flex items-center">
+              <FaRegCalendarAlt className="mr-1" />
+              {entryDate}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="mb-4">
+      <!-- 内容 -->
+      <div class="mb-3">
+        <div class="markdown-content" set:html={renderedContent} />
+      </div>
+
+      <!-- 标签 -->
+      {tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 ">
+          {tags.map((tag) => (
+            <a
+              href={`/moments/tags/${tag}`}
+              class="px-2 py-1 glass-l text-xs text-gray-900/50 rounded-full hover:bg-white/40 transition-colors duration-300 dark:text-gray-200/60"
+              data-key={tag}
+            >
+              #{tag}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</LiquidGlass>
+
+<script>
+  // 在DOM加载完成后初始化功能
+  if (typeof window !== 'undefined') {
+    // 等待DOM加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+      // 为所有复制按钮添加点击事件监听器
+      const copyButtons = document.querySelectorAll('.copy-code-btn');
+      copyButtons.forEach(button => {
+        button.addEventListener('click', function(this: HTMLButtonElement) {
+          const codeBlock = this.closest('.code-block-wrapper')?.querySelector('code');
+          if (!codeBlock) {
+            console.error('未找到代码块');
+            return;
+          }
+
+          const code = codeBlock.textContent || '';
+          const originalHTML = this.innerHTML;
+
+          navigator.clipboard.writeText(code).then(() => {
+            // 显示复制成功提示
+            this.innerHTML = `
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20,6 9,17 4,12"></polyline>
+              </svg>
+            `;
+            this.title = '已复制';
+
+            setTimeout(() => {
+              this.innerHTML = originalHTML;
+              this.title = '复制代码';
+            }, 2000);
+          }).catch((err) => {
+            console.error('复制失败:', err);
+            // 降级方案：选中文本
+            const range = document.createRange();
+            range.selectNode(codeBlock);
+            const selection = window.getSelection();
+            if (selection) {
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+          });
+        });
+      });
+
+      // 为所有图片添加点击事件监听器，实现灯箱功能
+      const images = document.querySelectorAll('.markdown-image img');
+      images.forEach(img => {
+        img.addEventListener('click', function(this: HTMLImageElement) {
+          const imgSrc = this.src;
+          const imgAlt = this.alt || '';
+
+          // 创建图片模态框
+          const modal = document.createElement('div');
+          modal.innerHTML = `
+            <div class="markdown-content">
+              <div class="image-modal">
+                <div class="image-modal-backdrop">
+                  <img src="${imgSrc}" alt="${imgAlt}" class="image-modal-content" />
+                  <button class="image-modal-close">&times;</button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // 添加到页面
+          document.body.appendChild(modal);
+
+          // 防止页面滚动
+          document.body.style.overflow = 'hidden';
+
+          // 关闭模态框函数
+          function closeModal() {
+            modal.classList.add('fade-out');
+            setTimeout(() => {
+              if (modal.parentElement) {
+                modal.remove();
+                // 恢复页面滚动
+                document.body.style.overflow = '';
+              }
+            }, 250);
+          }
+
+          // 点击背景关闭
+          const backdrop = modal.querySelector('.image-modal-backdrop');
+          if (backdrop) {
+            backdrop.addEventListener('click', function(e: Event) {
+              if (e.target === this) {
+                closeModal();
+              }
+            });
+          }
+
+          // 点击关闭按钮关闭
+          const closeBtn = modal.querySelector('.image-modal-close');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+          }
+
+          // 按ESC键关闭
+          function handleEscape(e: KeyboardEvent) {
+            if (e.key === 'Escape') {
+              closeModal();
+            }
+          }
+          document.addEventListener('keydown', handleEscape);
+
+          // 移除事件监听器
+          modal.addEventListener('remove', function() {
+            document.removeEventListener('keydown', handleEscape);
+          });
+        });
+      });
+    });
+  }
+</script>

@@ -1,0 +1,88 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+import PageHeader from "@components/common/PageHeader.astro";
+import LiquidGlass from "@components/common/LiquidGlassLess.astro";
+
+// 从API获取moments数据
+const apiUrl = "https://mm.zsxcoder.top/public/notes";
+
+let tags = [];
+
+// 获取所有标签
+async function getAllTags() {
+  try {
+    const response = await fetch(apiUrl);
+    if (response.ok) {
+      const moments = await response.json();
+      const tagSet = new Set();
+      moments.forEach((moment: any) => {
+        moment.tags.forEach((tag: string) => tagSet.add(tag));
+      });
+      return Array.from(tagSet);
+    }
+  } catch (error) {
+    console.error("获取tags数据出错:", error);
+  }
+  return [];
+}
+
+tags = await getAllTags();
+
+const title = "Moments 标签";
+const description = "所有说说标签";
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="container px-3 lg:px-8">
+    <PageHeader
+      title={title}
+      description={description}
+      articleCount={tags.length}
+    />
+    <section class="">
+      <div class="flex" style="padding:0px;">
+        <div class="row px-0 mx-0 w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <!-- tags list -->
+          <div class="lg:col-span-3 p-0">
+            <LiquidGlass
+              heavy
+              containerClass="p-6"
+              animation="fadeRight"
+            >
+              {tags.length > 0 ? (
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {tags.map((tag) => (
+                    <a
+                      href={`/moments/tags/${tag}`}
+                      class="p-4 text-center rounded-lg bg-gradient-to-br from-white/60 to-slate-50/60 backdrop-blur-lg border border-white/30 hover:border-[#d3bc8e] transition-all duration-300 hover:shadow-md"
+                    >
+                      #{tag}
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p class="text-center">暂无标签</p>
+              )}
+            </LiquidGlass>
+          </div>
+          <!-- sidebar -->
+          <div
+            class="lg:col-span-1 lg:flex max-h-static_sidemenu sticky p-0 lg:pl-5 top-[4rem]"
+          >
+            <LiquidGlass
+              heavy
+              wrapperClass="dock !p-6"
+              containerClass="py-5 w-full"
+              animation="fadeLeft"
+            >
+              <div class="sidebar-widget mb-8">
+                <h4 class="mb-3">标签</h4>
+                <p>共 {tags.length} 个标签</p>
+              </div>
+            </LiquidGlass>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

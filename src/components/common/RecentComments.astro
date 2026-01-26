@@ -75,7 +75,7 @@ const titleMap = Object.fromEntries(
   function ensureTwikoo(cb){
     if(window.twikoo){cb();return}
     const s=document.createElement("script");
-    s.src="https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js";
+    s.src="https://cdn.jsdmirror.com/npm/twikoo@1.6.44/dist/twikoo.min.js";
     s.async=true;
     s.onload=cb;
     document.body.appendChild(s);
@@ -149,7 +149,7 @@ const titleMap = Object.fromEntries(
   function ensureTwikoo(cb){
     if(window.twikoo){cb();return}
     const s=document.createElement("script");
-    s.src="https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js";
+    s.src="https://cdn.jsdmirror.com/npm/twikoo@1.6.44/dist/twikoo.min.js";
     s.async=true;
     s.onload=cb;
     s.onerror=()=>{

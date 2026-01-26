@@ -1,0 +1,64 @@
+---
+import CollectionLayout from "@components/moments/CollectionLayout.astro";
+import
+ { getPageSize } from "@lib/config";
+
+// 获取笔记每页显示数量
+const entriesPerPage = getPageSize('notes'); // 复用博客的分页配置
+
+// 固定为第一页
+const currentPageIndex = 1;
+
+// 从API获取moments数据
+const apiUrl = "https://mm.zsxcoder.top/public/notes";
+
+// 定义类型
+interface Moment {
+  id: string;
+  createdAt: string;
+  content: string;
+  tags: string[];
+}
+
+let moments: Moment[] = [];
+let allMomentsCount = 0;
+let tags: string[] = [];
+
+try {
+  const response = await fetch(apiUrl);
+  if (response.ok) {
+    moments = await response.json();
+    allMomentsCount = moments.length;
+    
+    // 提取所有标签
+    const tagSet = new Set<string>();
+    moments.forEach((moment: Moment) => {
+      moment.tags.forEach((tag: string) => tagSet.add(tag));
+    });
+    tags = Array.from(tagSet);
+    
+    // 按创建时间排序
+    moments.sort((a: Moment, b: Moment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } else {
+    console.error("获取moments数据失败:", response.status);
+  }
+} catch (error) {
+  console.error("获取moments数据出错:", error);
+}
+
+// 计算当前页的内容（第一页）
+const indexOfLastEntry = currentPageIndex * entriesPerPage;
+const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+const currentEntries = moments.slice(indexOfFirstEntry, indexOfLastEntry);
+
+// 计算总页数
+const pageCount: number = Math.ceil(moments.length / entriesPerPage);
+---
+
+<CollectionLayout
+  entries={currentEntries}
+  tags={tags}
+  pageIndex={currentPageIndex}
+  pageCount={pageCount}
+  allMomentsCount={allMomentsCount}
+/>

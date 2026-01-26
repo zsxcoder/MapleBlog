@@ -1,0 +1,101 @@
+---
+import CollectionLayout from "@components/moments/CollectionLayout.astro";
+import { getPageSize } from "@lib/config";
+
+// 获取笔记每页显示数量
+const entriesPerPage = getPageSize('notes'); // 复用博客的分页配置
+
+// 获取当前标签
+const { slug } = Astro.params;
+const currentTag = slug as string;
+
+// 固定为第一页
+const currentPageIndex = 1;
+
+// 定义类型
+interface Moment {
+  id: string;
+  createdAt: string;
+  content: string;
+  tags: string[];
+}
+
+// 从API获取moments数据
+const apiUrl = "https://mm.zsxcoder.top/public/notes";
+
+let moments: Moment[] = [];
+let filteredMoments: Moment[] = [];
+let allMomentsCount = 0;
+let tags: string[] = [];
+
+// 获取所有标签
+async function getAllTags(): Promise<string[]> {
+  try {
+    const response = await fetch(apiUrl);
+    if (response.ok) {
+      const moments = await response.json() as Moment[];
+      const tagSet = new Set<string>();
+      moments.forEach((moment: Moment) => {
+        moment.tags.forEach((tag: string) => tagSet.add(tag));
+      });
+      return Array.from(tagSet) as string[];
+    }
+  } catch (error) {
+    console.error("获取tags数据出错:", error);
+  }
+  return [];
+}
+
+tags = await getAllTags();
+
+// 获取当前标签的moments
+async function getMomentsByTag(tag: string) {
+  try {
+    const response = await fetch(apiUrl);
+    if (response.ok) {
+      const moments = await response.json() as Moment[];
+      const filtered = moments.filter((moment: Moment) => 
+        moment.tags.includes(tag)
+      );
+      // 按创建时间排序
+      filtered.sort((a: Moment, b: Moment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return {
+        moments,
+        filteredMoments: filtered,
+        allMomentsCount: filtered.length
+      };
+    }
+  } catch (error) {
+    console.error("获取moments数据出错:", error);
+  }
+  return {
+    moments: [],
+    filteredMoments: [],
+    allMomentsCount: 0
+  };
+}
+
+const { moments: allMoments, filteredMoments: tagMoments, allMomentsCount: tagMomentsCount } = await getMomentsByTag(currentTag);
+
+// 计算当前页的内容（第一页）
+const indexOfLastEntry = currentPageIndex * entriesPerPage;
+const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+const currentEntries = tagMoments.slice(indexOfFirstEntry, indexOfLastEntry);
+
+// 计算总页数
+const pageCount: number = Math.ceil(tagMoments.length / entriesPerPage);
+
+// 处理无效标签
+if (currentTag && !tags.includes(currentTag)) {
+  return Astro.redirect('/moments/tags');
+}
+---
+
+<CollectionLayout
+  entries={currentEntries}
+  tags={tags}
+  pageIndex={currentPageIndex}
+  pageCount={pageCount}
+  allMomentsCount={tagMomentsCount}
+  basePath={`/moments/tags/${currentTag}`}
+/>

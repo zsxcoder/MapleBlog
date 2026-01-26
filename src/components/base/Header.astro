@@ -40,17 +40,36 @@ const menu = [
   {
     id: 3,
     name: "动态",
-    url: "/notes",
+    url: "#",
     target: "_self",
     position: "header",
     parent_id: null,
     sort_order: 3,
-    children: [],
+    children: [
+      {
+        id: 31,
+        name: "日记",
+        url: "/notes",
+        target: "_self",
+        position: "header",
+        parent_id: 3,
+        sort_order: 1,
+      },
+      {
+        id: 32,
+        name: "即刻",
+        url: "/moments",
+        target: "_self",
+        position: "header",
+        parent_id: 3,
+        sort_order: 2,
+      },
+    ],
   },
   {
-    id: 4,
-    name: "关于",
-    url: "/about",
+    id:4,
+    name: "友链",
+    url: "/links",
     target: "_self",
     position: "header",
     parent_id: null,
@@ -59,8 +78,8 @@ const menu = [
   },
   {
     id: 5,
-    name: "友链",
-    url: "/links",
+    name: "关于",
+    url: "/about",
     target: "_self",
     position: "header",
     parent_id: null,
@@ -142,26 +161,73 @@ const menu = [
     >
       {
         menu.map((item: any) => (
-          <li>
-            <a
-              href={item.url}
-              target={item.target || "_self"}
-              class={`flex items-center justify-center h-full my-4 md:my-0 border-none gap-2 px-1 font-bold text-txt-p transition-all duration-300 dark:text-darkmode-txt-p lg:px-2 rounded-xl relative z-10 hover:text-orange-600 dark:hover:text-orange-500 text-lg ${
-                pathname === `${item.url}/` || pathname === item.url
-                  ? "text-orange-500"
-                  : ""
-              }`}
-            >
-              <GlassButton
-                variant="menu"
-                size="menu"
-                open={pathname === `${item.url}/` || pathname === item.url}
-                className="!text-orange-300  w-full"
+          <li data-key={item.id} class={`relative group ${item.children && item.children.length > 0 ? 'dropdown' : ''}`}>
+            {item.children && item.children.length > 0 ? (
+              <a
+                href={item.url}
+                target={item.target || "_self"}
+                class={`flex items-center justify-center h-full my-4 md:my-0 border-none gap-2 px-1 font-bold text-txt-p transition-all duration-300 dark:text-darkmode-txt-p lg:px-2 rounded-xl relative z-10 hover:text-orange-600 dark:hover:text-orange-500 text-lg dropdown-toggle ${
+                  pathname === `${item.url}/` || pathname === item.url
+                    ? "text-orange-500"
+                    : ""
+                }`}
               >
-                {item.icon && <span class="text-sm">{item.icon}</span>}
-                {item.name}
-              </GlassButton>
-            </a>
+                <GlassButton
+                  variant="menu"
+                  size="menu"
+                  open={pathname === `${item.url}/` || pathname === item.url}
+                  className="!text-orange-300  w-full"
+                >
+                  {item.icon && <span class="text-sm">{item.icon}</span>}
+                  {item.name}
+                  <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </GlassButton>
+              </a>
+            ) : (
+              <a
+                href={item.url}
+                target={item.target || "_self"}
+                class={`flex items-center justify-center h-full my-4 md:my-0 border-none gap-2 px-1 font-bold text-txt-p transition-all duration-300 dark:text-darkmode-txt-p lg:px-2 rounded-xl relative z-10 hover:text-orange-600 dark:hover:text-orange-500 text-lg ${
+                  pathname === `${item.url}/` || pathname === item.url
+                    ? "text-orange-500"
+                    : ""
+                }`}
+              >
+                <GlassButton
+                  variant="menu"
+                  size="menu"
+                  open={pathname === `${item.url}/` || pathname === item.url}
+                  className="!text-orange-300  w-full"
+                >
+                  {item.icon && <span class="text-sm">{item.icon}</span>}
+                  {item.name}
+                </GlassButton>
+              </a>
+            )}
+
+            {/* 渲染子菜单 */}
+            {item.children && item.children.length > 0 && (
+              <ul class="submenu dropdown-menu absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 opacity-0 visibility-hidden transition-all duration-300 transform origin-top scale-95 hover:scale-100 z-50 md:min-w-[150px]">
+                {item.children.map((child: any) => (
+                  <li data-key={child.id}>
+                    <a
+                      href={child.url}
+                      target={child.target || "_self"}
+                      class={`block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-md ${
+                        pathname === `${child.url}/` || pathname === child.url
+                          ? "text-orange-500 dark:text-orange-400"
+                          : ""
+                      }`}
+                    >
+                      {child.icon && <span class="mr-2">{child.icon}</span>}
+                      {child.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))
       }
@@ -296,8 +362,11 @@ const menu = [
       // 移除所有激活状态和指示器
       menuItems.forEach((item) => {
         item.classList.remove("text-orange-500", "hover-active");
-        item.children[0].className =
-          "!gap-[inherit] !px-4 !py-2 border border-white/0 w-full";
+        // 只有当item有子元素时才修改className，避免访问undefined
+        if (item.children.length > 0) {
+          item.children[0].className =
+            "!gap-[inherit] !px-4 !py-2 border border-white/0 w-full";
+        }
       });
 
       // 找到当前激活的菜单项
@@ -311,7 +380,7 @@ const menu = [
       });
 
       // 添加当前页面的激活状态
-      if (activeItem) {
+      if (activeItem && activeItem.children.length > 0) {
         // 设置文本颜色
         activeItem.classList.add("text-orange-500");
         activeItem.children[0].className +=
@@ -342,8 +411,8 @@ const menu = [
         currentPath === href + "/" ||
         (href && href !== "/" && currentPath.indexOf(href) !== -1);
 
-      // 如果不是当前页面，添加悬浮激活样式
-      if (!isCurrentPage) {
+      // 如果不是当前页面且有子元素，添加悬浮激活样式
+      if (!isCurrentPage && item.children.length > 0) {
         item.classList.add("text-orange-500", "hover-active");
         item.children[0].className +=
           " glass-button glass-button--menu glass-button--menu dark:!text-orange-300 dark:!bg-black/30 dark:!border-gray-400  w-full";
@@ -362,8 +431,8 @@ const menu = [
         currentPath === href + "/" ||
         (href && href !== "/" && currentPath.indexOf(href) !== -1);
 
-      // 如果不是当前页面，移除悬浮激活样式
-      if (!isCurrentPage) {
+      // 如果不是当前页面且有子元素，移除悬浮激活样式
+      if (!isCurrentPage && item.children.length > 0) {
         item.classList.remove("text-orange-500", "hover-active");
         item.children[0].className =
           "!gap-[inherit] !px-4 !py-2 border border-white/0 w-full";
@@ -448,7 +517,7 @@ const menu = [
             if (!articles || articles.length === 0) {
               throw new Error("没有找到可用的文章");
             }
-            
+
 
             // 随机选择一篇文章
             const randomIndex = Math.floor(Math.random() * articles.length);

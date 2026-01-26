@@ -13,7 +13,7 @@
         }
         const script = document.createElement("script");
         script.src =
-          "https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js";
+          "https://cdn.jsdmirror.com/npm/twikoo@1.6.44/dist/twikoo.min.js";
         script.async = true;
         script.onload = () => {
           const initScript = document.createElement("script");
@@ -25,13 +25,13 @@
                 // Twikoo 初始化完成后，动态加载自定义样式
                 loadTwikooCustomStyles();
             });
-            
+
             // 动态加载 Twikoo 自定义样式的函数
             function loadTwikooCustomStyles() {
                 if (document.getElementById('twikoo-custom-link')) {
                     return;
                 }
-                
+
                 const link = document.createElement('link');
                 link.id = 'twikoo-custom-link';
                 link.rel = 'stylesheet';

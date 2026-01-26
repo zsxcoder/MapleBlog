@@ -24,20 +24,21 @@ renderer.heading = function(text: string, level: number) {
   </h${level}>`;
 };
 
-// 自定义代码块渲染，添加语言标识和复制按钮
+// 自定义代码块渲染，使用简单的HTML结构确保样式正确应用
 renderer.code = function(code: string, language: string | undefined) {
   const validLang = language && language !== '' ? language : 'text';
+  // 使用简单的HTML结构，确保样式正确应用
   return `<div class="code-block-wrapper">
     <div class="code-block-header">
-      <span class="code-language">${validLang}</span>
-      <button class="copy-code-btn" onclick="copyCode(this)" title="复制代码">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>
-      </button>
     </div>
-    <pre><code class="language-${validLang}">${code}</code></pre>
+    <span class="code-language-badge">${validLang}</span>
+    <button class="copy-code-btn" title="复制代码">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </button>
+    <pre class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${validLang}">${code}</code></pre>
   </div>`;
 };
 
@@ -83,10 +84,12 @@ export const slugify = (content: string) => {
 };
 
 // markdownify
-export const markdownify = async (content: string, div?: boolean) => {
+export const markdownify = async (content: string | undefined | null, div?: boolean) => {
   const options = { renderer };
-  // content = await extractImageUrls(content);
-  return div ? marked.parse(content, options) : marked.parseInline(content, options);
+  // 空值检查，避免marked库报错
+  const safeContent = content || '';
+  // content = await extractImageUrls(safeContent);
+  return div ? await marked.parse(safeContent, options) : await marked.parseInline(safeContent, options);
 };
 
 /**
@@ -139,8 +142,9 @@ export const lowerHumanize = (content: string | undefined) => {
 };
 
 // plainify
-export const plainify = (content: string) => {
-  const parseMarkdown = marked.parse(content);
+export const plainify = (content: string | undefined | null) => {
+  const safeContent = content || '';
+  const parseMarkdown = marked.parse(safeContent);
   const filterBrackets = parseMarkdown.replace(/<\/?[^>]+(>|$)/gm, "");
   const filterSpaces = filterBrackets.replace(/[\r\n]\s*[\r\n]/gm, "");
   const stripHTML = htmlEntityDecoder(filterSpaces);

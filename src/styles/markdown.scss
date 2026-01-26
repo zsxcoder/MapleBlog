@@ -22,7 +22,7 @@
 }
 
 .markdown-content,
-.markdown-content>*,
+.markdown-content>*, 
 .astro-content,
 .tk-comment {
   pre.astro-code {
@@ -39,6 +39,42 @@
     :first-child {
       @apply pl-0;
     }
+  }
+
+  // 代码块包装器样式
+  .code-block-wrapper {
+    @apply relative mb-6 rounded-lg overflow-hidden;
+    position: relative;
+  }
+
+  // 复制按钮样式 - 定位到右上角
+  .copy-code-btn {
+    @apply absolute top-2 right-2 z-10 bg-gray-200/80 dark:bg-gray-800/80;
+    @apply text-gray-700 dark:text-gray-300;
+    @apply p-2 rounded-md cursor-pointer transition-all duration-200;
+    @apply hover:bg-gray-300/90 dark:hover:bg-gray-700/90;
+    @apply backdrop-blur-sm;
+    border: none;
+    outline: none;
+  }
+
+  // 代码语言标识样式 - 定位到右上角，复制按钮左边
+  .code-language-badge {
+    @apply absolute top-2 right-12 z-10 bg-gray-200/80 dark:bg-gray-800/80;
+    @apply text-gray-700 dark:text-gray-300;
+    @apply px-3 py-1 rounded-md text-xs uppercase tracking-wider font-mono;
+    @apply backdrop-blur-sm;
+  }
+
+  // 代码块头部样式
+  .code-block-header {
+    @apply bg-transparent;
+    @apply h-0;
+  }
+
+  // 代码语言标签样式 - 兼容旧样式
+  .code-language {
+    @apply text-xs uppercase tracking-wider;
   }
 
   // 确保样式能够应用到 render() 生成的内容
