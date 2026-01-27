@@ -69,3 +69,11 @@ export const getSiteUrl = () => {
   // 在构建时使用生产URL，开发时使用开发URL
   return import.meta.env.PUBLIC_ENV === 'production' ? SITE_INFO.URL : SITE_INFO.DEV_URL;
 };
+
+// 公告组件配置
+export const ANNOUNCEMENT_CONFIG = {
+  title: "公告",
+  content: "欢迎来到钟神秀的博客，博客目前还在建设中🏗️。。。",
+  link: "/about",
+  linkText: "了解更多"
+} as const;

@@ -14,6 +14,7 @@ import { sortByDate } from "@lib/sortFunctions";
 import { getEntries } from "@lib/contentParser";
 import RecentComments from "@components/common/RecentComments.astro";
 import RecommendedReadCardComponent from "@components/blog/RecommendedReadCard.astro";
+import Announcement from "@components/widget/Announcement.astro";
 // 浏览量组件已移除
 // showInfo 函数将在需要时动态导入
 
@@ -107,6 +108,12 @@ const siteStats = await getSiteStats();
         </div>
       </div>
     </section>
+
+    <!-- Announcement Section -->
+    <section class="mb-4">
+      <Announcement />
+    </section>
+
     <!-- Categories Section -->
     <section class="rounded-lg">
       <!-- Categories Grid -->
