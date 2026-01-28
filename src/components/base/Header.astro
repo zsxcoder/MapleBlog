@@ -58,7 +58,7 @@ const menu = [
       {
         id: 32,
         name: "即刻",
-        url: "/moments",
+        url: "/memos",
         target: "_self",
         position: "header",
         parent_id: 3,
@@ -209,7 +209,7 @@ const menu = [
 
             {/* 渲染子菜单 */}
             {item.children && item.children.length > 0 && (
-              <ul class="submenu dropdown-menu absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 opacity-0 visibility-hidden transition-all duration-300 transform origin-top scale-95 hover:scale-100 z-50 md:min-w-[150px]">
+              <ul class="submenu dropdown-menu absolute top-full left-0 mt-1 backdrop-blur-lg bg-white/70 dark:bg-gray-800/70 rounded-lg shadow-lg py-1 opacity-0 visibility-hidden transition-all duration-300 transform origin-top scale-95 hover:scale-100 z-50 md:min-w-[150px] border border-white/30 dark:border-gray-700/30">
                 {item.children.map((child: any) => (
                   <li data-key={child.id}>
                     <a

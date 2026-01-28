@@ -36,13 +36,13 @@ export async function GET(context: APIContext) {
     .slice(0, 25);
 
   const siteUrl = context.site!.toString().replace(/\/$/, '');
-  const feedUpdated = sortedPosts.length > 0 
+  const feedUpdated = sortedPosts.length > 0
     ? formatDate(sortedPosts[0].data.publishedAt || sortedPosts[0].data.createdAt || new Date())
     : formatDate(new Date());
 
   // 构建 RSS 2.0 XML
   const rssXml = `<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>猫普的精神世界</title>
     <description>一个独立开发者的精神自留地</description>
@@ -59,11 +59,11 @@ export async function GET(context: APIContext) {
 ${sortedPosts.map((post) => {
     const pubDate = post.data.publishedAt || post.data.createdAt || new Date();
     const updatedDate = post.data.updatedAt || pubDate;
-    const description = post.data.description || 
+    const description = post.data.description ||
       (post.body ? post.body.slice(0, 200).replace(/[#*`]/g, '') + '...' : '暂无描述');
     const postUrl = `${siteUrl}/blog/${post.id}/`;
     const author = post.data.author || 'Maplezz';
-    
+
     // 处理封面图
     let imageContent = '';
     if (post.data.image && typeof post.data.image.src === 'string') {
@@ -76,17 +76,23 @@ ${sortedPosts.map((post) => {
       } else if (!imageUrl.startsWith('http')) {
         imageUrl = `${siteUrl}/${imageUrl}`;
       }
-      
+
       imageContent = `<enclosure url="${escapeXml(imageUrl)}" type="image/jpeg" />`;
     }
-    
+
     // 处理分类
     const categories = post.data.categories?.filter(Boolean) || [];
-    const categoryContent = categories.map(cat => 
+    const categoryContent = categories.map(cat =>
       cat &&
       `<category>${escapeXml(cat)}</category>`
     ).join('');
-    
+
+    // 处理完整文章内容
+    let contentEncoded = '';
+    if (post.body) {
+      contentEncoded = `<content:encoded><![CDATA[${post.body}]]></content:encoded>`;
+    }
+
     return `    <item>
       <title>${escapeXml(post.data.title)}</title>
       <link>${postUrl}</link>
@@ -94,6 +100,7 @@ ${sortedPosts.map((post) => {
       <pubDate>${formatDate(pubDate)}</pubDate>
       <author>${escapeXml(author)}</author>
       <description>${escapeXml(description)}</description>
+      ${contentEncoded}
       ${imageContent}
       ${categoryContent}
     </item>`;

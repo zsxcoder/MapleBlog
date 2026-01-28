@@ -130,7 +130,7 @@
 
   ul,
   ol {
-    @apply mb-4 pl-6;
+    @apply mb-6 pl-6 space-y-2;
   }
 
   ul {
@@ -142,17 +142,63 @@
   }
 
   li {
-    @apply mb-2 text-txt-p dark:text-darkmode-txt-p leading-8;
-    @apply ml-8 inset-0;
+    @apply mb-3 text-txt-p dark:text-darkmode-txt-p leading-8 relative;
+    @apply ml-8 inset-0 transition-all duration-200;
+  }
+
+  li:hover {
+    @apply ml-9;
   }
 
   li::marker {
-    @apply text-cyan-700 dark:text-amber-300;
+    @apply text-cyan-700 dark:text-amber-300 font-semibold text-lg;
     @apply inset-0;
   }
 
   li p {
     @apply indent-0;
+  }
+
+  // 嵌套列表样式
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    @apply mb-2 mt-2 pl-4;
+  }
+
+  ul ul li,
+  ul ol li,
+  ol ul li,
+  ol ol li {
+    @apply mb-2 ml-6;
+  }
+
+  ul ul li:hover,
+  ul ol li:hover,
+  ol ul li:hover,
+  ol ol li:hover {
+    @apply ml-7;
+  }
+
+  // 无序列表标记颜色
+  ul li::marker {
+    @apply text-cyan-600 dark:text-cyan-400;
+  }
+
+  // 有序列表标记颜色
+  ol li::marker {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+
+  // 嵌套无序列表标记
+  ul ul li::marker {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+
+  // 嵌套有序列表标记
+  ol ol li::marker {
+    @apply text-green-600 dark:text-green-400;
   }
 
   blockquote {

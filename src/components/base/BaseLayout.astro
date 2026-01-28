@@ -10,6 +10,9 @@ import { SITE_INFO } from "@lib/config";
 import { isDevelopment } from "@lib/env";
 // 导入Markdown工具函数，提供copyCode等功能
 import "@lib/markdownUtils";
+// 导入文章更新通知组件
+import PostContentHighlighter from "@components/widget/PostContentHighlighter.astro";
+import NewPostNotification from "@components/widget/NewPostNotification.astro";
 
 // types for frontmatters
 export interface Props {
@@ -638,6 +641,9 @@ const customFooterCode = customSettings?.custom_footer_code || "";
       <slot />
     </main>
     <Footer />
+    <!-- 文章更新通知组件 -->
+    <PostContentHighlighter />
+    <NewPostNotification />
     <!-- <ObserverScript /> -->
     <!-- KaTeX 初始化脚本 -->
     <script>

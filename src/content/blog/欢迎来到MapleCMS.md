@@ -27,7 +27,7 @@ MapleBlog 是一款轻量级、开源的内容管理系统，专为个人博客�
 
 1. 克隆仓库  
    ```bash
-   git clone https://github.com/maplezzzzzz/MapleBlog.git
+   git clone https://github.com/zsxcoder/MapleBlog.git
    cd MapleBlog
    ```
 
@@ -93,4 +93,5 @@ MapleBlog 追求“够用、好用、轻量”的理念，让创作者把精力�
 更多进阶玩法，请查阅[官方文档](https://MapleBlog.example.com/docs)。
 
 ---  
-*最后更新：2025-11-05*
+*最后更新：2026-01-28*
+

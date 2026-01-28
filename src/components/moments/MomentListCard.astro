@@ -3,6 +3,8 @@ import { FaRegCalendarAlt, FaMapMarkerAlt, FaSmile } from "react-icons/fa";
 import { formatDate } from "@lib/formatDate";
 import LiquidGlass from "@components/common/LiquidGlassLess.astro";
 import { markdownify } from "@lib/textConverter";
+import '@fancyapps/ui/dist/fancybox/fancybox.css';
+import { Fancybox } from '@fancyapps/ui';
 
 interface Props {
   moment: {
@@ -20,8 +22,8 @@ const content = message;
 
 const entryDate = createdAt ? formatDate(new Date(createdAt)) : null;
 
-// 根据isUseMarkdown字段决定是否处理Markdown内容
-const renderedContent = await markdownify(content, isUseMarkdown);
+// 强制处理Markdown内容，因为memos中的内容是Markdown格式
+const renderedContent = await markdownify(content, true);
 
 ---
 
@@ -78,12 +80,21 @@ const renderedContent = await markdownify(content, isUseMarkdown);
           ))}
         </div>
       )}
+
+      <!-- 位置信息 -->
+      {moment.location && moment.location.placeholder && (
+        <div class="mt-3 flex items-center text-xs text-gray-600 dark:text-gray-400">
+          <FaMapMarkerAlt className="mr-1" />
+          <span>{moment.location.placeholder}</span>
+        </div>
+      )}
     </div>
   </div>
 </LiquidGlass>
 
 <script>
   import { initCopyButtons } from '@lib/markdownUtils';
+  import { Fancybox } from '@fancyapps/ui';
 
   // 在DOM加载完成后初始化功能
   if (typeof window !== 'undefined') {
@@ -92,73 +103,53 @@ const renderedContent = await markdownify(content, isUseMarkdown);
       // 手动初始化复制按钮功能，因为内容是动态渲染的
       initCopyButtons();
 
-      // 为所有图片添加点击事件监听器，实现灯箱功能
+      // 移除可能存在的其他灯箱事件监听器
       const images = document.querySelectorAll('.markdown-image img');
       images.forEach(img => {
-        img.addEventListener('click', function(this: HTMLImageElement) {
-          const imgSrc = this.src;
-          const imgAlt = this.alt || '';
+        // 移除所有点击事件监听器
+        const clone = img.cloneNode(true);
+        img.parentNode?.replaceChild(clone, img);
+      });
 
-          // 创建图片模态框
-          const modal = document.createElement('div');
-          modal.innerHTML = `
-            <div class="markdown-content">
-              <div class="image-modal">
-                <div class="image-modal-backdrop">
-                  <img src="${imgSrc}" alt="${imgAlt}" class="image-modal-content" />
-                  <button class="image-modal-close">&times;</button>
-                </div>
-              </div>
-            </div>
-          `;
+      // 重新获取图片元素并添加fancybox灯箱功能
+      const newImages = document.querySelectorAll('.markdown-image img');
+      newImages.forEach(img => {
+        // 添加data-fancybox属性
+        img.setAttribute('data-fancybox', 'gallery');
+        // 设置图片标题
+        if (img.alt) {
+          img.setAttribute('data-caption', img.alt);
+        }
+      });
 
-          // 添加到页面
-          document.body.appendChild(modal);
+      // 初始化fancybox前确保清理
+      try {
+        // 销毁可能存在的实例
+        Fancybox.destroy();
+      } catch (e) {
+        // 忽略错误
+      }
 
-          // 防止页面滚动
-          document.body.style.overflow = 'hidden';
-
-          // 关闭模态框函数
-          function closeModal() {
-            modal.classList.add('fade-out');
-            setTimeout(() => {
-              if (modal.parentElement) {
-                modal.remove();
-                // 恢复页面滚动
-                document.body.style.overflow = '';
-              }
-            }, 250);
-          }
-
-          // 点击背景关闭
-          const backdrop = modal.querySelector('.image-modal-backdrop');
-          if (backdrop) {
-            backdrop.addEventListener('click', function(e: Event) {
-              if (e.target === this) {
-                closeModal();
-              }
-            });
-          }
-
-          // 点击关闭按钮关闭
-          const closeBtn = modal.querySelector('.image-modal-close');
-          if (closeBtn) {
-            closeBtn.addEventListener('click', closeModal);
-          }
-
-          // 按ESC键关闭
-          function handleEscape(e: KeyboardEvent) {
-            if (e.key === 'Escape') {
-              closeModal();
-            }
-          }
-          document.addEventListener('keydown', handleEscape);
-
-          // 移除事件监听器
-          modal.addEventListener('remove', function() {
-            document.removeEventListener('keydown', handleEscape);
-          });
-        });
+      // 初始化fancybox
+      Fancybox.bind('[data-fancybox="gallery"]', {
+        // 配置选项
+        animationEffect: 'zoom', // 动画效果
+        transitionEffect: 'slide', // 过渡效果
+        buttons: [
+          'zoom',
+          'fullScreen',
+          'thumbs',
+          'close'
+        ],
+        toolbar: true,
+        infinite: true,
+        keyboard: true,
+        clickContent: 'zoom',
+        clickSlide: 'close',
+        // 防止双击放大
+        doubleClick: 'zoom',
+        // 确保只有一个实例
+        groupAll: false
       });
     });
   }

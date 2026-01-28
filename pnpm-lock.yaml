@@ -44,6 +44,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.38.0
         version: 6.39.11
+      '@fancyapps/ui':
+        specifier: ^6.1.9
+        version: 6.1.9
       '@iconify/react':
         specifier: ^6.0.2
         version: 6.0.2(react@18.3.1)
@@ -77,6 +80,9 @@ importers:
       date-fns-tz:
         specifier: ^2.0.0
         version: 2.0.1(date-fns@2.30.0)
+      diff:
+        specifier: ^8.0.3
+        version: 8.0.3
       fuse.js:
         specifier: ^6.6.2
         version: 6.6.2
@@ -758,6 +764,9 @@ packages:
   '@eslint/js@8.57.1':
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  '@fancyapps/ui@6.1.9':
+    resolution: {integrity: sha512-ui+p83lGIAl4s3RYTQhuM905LUoVOh+u9J7mJurC+2SeYekY9l69JUm7v90JW5gWCsUmuyaGNwjwVfMYeKLrfw==}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -4456,6 +4465,8 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.57.1': {}
+
+  '@fancyapps/ui@6.1.9': {}
 
   '@hapi/hoek@9.3.0': {}
 

@@ -1,0 +1,72 @@
+---
+import CollectionLayout from "@components/moments/CollectionLayout.astro";
+import
+ { getPageSize } from "@lib/config";
+
+// 获取笔记每页显示数量
+const entriesPerPage = getPageSize('notes'); // 复用博客的分页配置
+
+// 固定为第一页
+const currentPageIndex = 1;
+
+// 从API获取memos数据
+const apiUrl = "https://m.314926.xyz/api/v1/memos";
+
+// 定义类型
+interface Memo {
+  id: string;
+  createdAt: string;
+  content: string;
+  tags: string[];
+}
+
+let memos: Memo[] = [];
+let allMemosCount = 0;
+let tags: string[] = [];
+
+try {
+  const response = await fetch(apiUrl);
+  if (response.ok) {
+    const data = await response.json();
+    // 检查数据格式，从data.memos中获取memos数组
+    memos = data && Array.isArray(data.memos) ? data.memos : [];
+    allMemosCount = memos.length;
+
+    // 提取所有标签
+    const tagSet = new Set<string>();
+    memos.forEach((memo: Memo) => {
+      if (memo.tags && Array.isArray(memo.tags)) {
+        memo.tags.forEach((tag: string) => tagSet.add(tag));
+      }
+    });
+    tags = Array.from(tagSet);
+
+    // 按创建时间排序
+    memos.sort((a: Memo, b: Memo) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } else {
+    console.error("获取memos数据失败:", response.status);
+  }
+} catch (error) {
+  console.error("获取memos数据出错:", error);
+}
+
+// 计算当前页的内容（第一页）
+const indexOfLastEntry = currentPageIndex * entriesPerPage;
+const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+const currentEntries = memos.slice(indexOfFirstEntry, indexOfLastEntry).map(memo => ({
+  ...memo,
+  message: memo.content
+}));
+
+// 计算总页数
+const pageCount: number = Math.ceil(memos.length / entriesPerPage);
+---
+
+<CollectionLayout
+  entries={currentEntries}
+  tags={tags}
+  pageIndex={currentPageIndex}
+  pageCount={pageCount}
+  allMomentsCount={allMemosCount}
+  basePath="memos"
+/>
