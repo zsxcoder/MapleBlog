@@ -15,7 +15,7 @@ export const getIndex = async (collection: CollectionKey): Promise<GenericEntry 
 
 /**
  * 获取指定集合的所有文章或动态（根据类型），并根据配置进行过滤和排序。
- * 
+ *
  * @param collection 集合键（如 'blog' 或 'notes'）
  * @param sortFunction 可选的排序函数，用于对条目进行自定义排序
  * @param noIndex 是否过滤掉索引页（如 '-index' 开头的条目）
@@ -30,7 +30,7 @@ export const getEntries = async (
 ): Promise<GenericEntry[]> => {
   let entries: GenericEntry[] = await getCollection(collection);
   entries = noIndex
-    ? entries.filter((entry: GenericEntry) => !entry.id.match(/^-/))
+    ? entries.filter((entry: GenericEntry) => typeof entry.id === 'string' && !entry.id.match(/^-/))
     : entries;
   entries = noDrafts
     ? entries.filter((entry: GenericEntry) => 'draft' in entry.data && !entry.data.draft)
@@ -41,7 +41,7 @@ export const getEntries = async (
 
 /**
  * 获取多个集合的所有文章或动态（根据类型），并根据配置进行过滤和排序。
- * 
+ *
  * @param collections 集合键数组（如 ['blog', 'notes']）
  * @param sortFunction 可选的排序函数，用于对条目进行自定义排序
  * @param noIndex 是否过滤掉索引页（如 '-index' 开头的条目）
@@ -64,7 +64,7 @@ export const getEntriesBatch = async (
 
 /**
  * 获取指定集合的所有分类或标签（根据类型），并根据配置进行过滤和排序。
- * 
+ *
  * @param collection 集合键（如 'blog' 或 'notes'）
  * @param sortFunction 可选的排序函数，用于对条目进行自定义排序
  * @returns 符合条件的分类或标签数组
@@ -75,6 +75,7 @@ export const getGroups = async (
 ): Promise<GenericEntry[]> => {
   let entries = await getEntries(collection, sortFunction, false);
   entries = entries.filter((entry: GenericEntry) => {
+    if (typeof entry.id !== 'string') return false;
     const segments = entry.id.split("/");
     return segments.length === 2 && segments[1] == "-index";
   });
@@ -83,7 +84,7 @@ export const getGroups = async (
 
 /**
  * 获取指定集合中指定分类或标签下的所有文章或动态（根据类型），并根据配置进行过滤和排序。
- * 
+ *
  * @param collection 集合键（如 'blog' 或 'notes'）
  * @param groupSlug 分类或标签的 slug 名称（如 'game' 或 'web'）
  * @param sortFunction 可选的排序函数，用于对条目进行自定义排序
@@ -96,6 +97,7 @@ export const getEntriesInGroup = async (
 ): Promise<GenericEntry[]> => {
   let entries = await getEntries(collection, sortFunction);
   entries = entries.filter((data: any) => {
+    if (typeof data.id !== 'string') return false;
     const segments = data.id.split("/");
     return segments[0] === groupSlug && segments.length > 1 && segments[1] !== "-index";
   });
@@ -117,7 +119,7 @@ export const getCategoriesCount = async (): Promise<number> => {
   try {
     const blogEntries = await getEntries("blog");
     const categories = new Set<string>();
-    
+
     blogEntries.forEach((entry: any) => {
       // 处理 categories 数组格式
       if (entry.data.categories && Array.isArray(entry.data.categories)) {
@@ -130,7 +132,7 @@ export const getCategoriesCount = async (): Promise<number> => {
         categories.add(entry.data.category);
       }
     });
-    
+
     categoriesCount = categories.size;
     return categoriesCount;
   } catch (error) {
@@ -144,7 +146,7 @@ export const getTagsCount = async (): Promise<number> => {
   try {
     const blogEntries = await getEntries("blog");
     const tags = new Set<string>();
-    
+
     blogEntries.forEach((entry: any) => {
       if (entry.data.tags && Array.isArray(entry.data.tags)) {
         entry.data.tags.forEach((tag: string) => {
@@ -152,7 +154,7 @@ export const getTagsCount = async (): Promise<number> => {
         });
       }
     });
-    
+
     tagsCount = tags.size;
     return tagsCount;
   } catch (error) {
@@ -163,7 +165,7 @@ export const getTagsCount = async (): Promise<number> => {
 // 计算文本字数（中文按字符，英文按单词）
 const countWords = (text: string): number => {
   if (!text) return 0;
-  
+
   // 移除 Markdown 语法和 HTML 标签
   const cleanText = text
     .replace(/<[^>]*>/g, '') // 移除 HTML 标签
@@ -173,14 +175,14 @@ const countWords = (text: string): number => {
     .replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1') // 移除粗体斜体标记
     .replace(/\n+/g, ' ') // 将换行符替换为空格
     .trim();
-  
+
   if (!cleanText) return 0;
-  
+
   // 分离中文字符和英文单词
   const chineseChars = cleanText.match(/[\u4e00-\u9fff]/g) || [];
   const englishText = cleanText.replace(/[\u4e00-\u9fff]/g, ' ');
   const englishWords = englishText.match(/\b[a-zA-Z]+\b/g) || [];
-  
+
   return chineseChars.length + englishWords.length;
 };
 
@@ -192,19 +194,19 @@ export const getTotalWordCount = async (): Promise<string> => {
       getEntries("blog"),
       getEntries("notes").catch(() => []) // notes 集合可能不存在
     ]);
-    
+
     let totalWords = 0;
-    
+
     // 统计博客文章字数
     blogEntries.forEach((entry: any) => {
       totalWords += countWords(entry.body || '');
     });
-    
+
     // 统计动态字数
     notesEntries.forEach((entry: any) => {
       totalWords += countWords(entry.body || '');
     });
-    
+
     // 自动计算数字单位
     if (totalWords >= 1000000) {
       return `${(totalWords / 1000000).toFixed(1)}M`;
@@ -241,9 +243,9 @@ export const getSiteStats = async () => {
     getTagsCount(),
     getTotalWordCount()
   ]);
-  
+
   const runningDays = getSiteRunningDays();
-  
+
   return {
     articles: blogCount,
     categories: categoriesCount,
