@@ -307,7 +307,9 @@ import LiquidGlassLess from "@components/common/LiquidGlassLess.astro";
 
     interactionButtons.forEach((button) => {
       button.addEventListener("click", (e) => {
-        const effect = e.target.dataset.effect;
+        const mouseEvent = e as MouseEvent;
+        const target = mouseEvent.target as HTMLElement;
+        const effect = target?.dataset?.effect;
 
         // 创建点击反馈效果
         const ripple = document.createElement("div");
@@ -323,11 +325,12 @@ import LiquidGlassLess from "@components/common/LiquidGlassLess.astro";
         const rect = button.getBoundingClientRect();
         const size = Math.max(rect.width, rect.height);
         ripple.style.width = ripple.style.height = size + "px";
-        ripple.style.left = e.clientX - rect.left - size / 2 + "px";
-        ripple.style.top = e.clientY - rect.top - size / 2 + "px";
+        ripple.style.left = mouseEvent.clientX - rect.left - size / 2 + "px";
+        ripple.style.top = mouseEvent.clientY - rect.top - size / 2 + "px";
 
-        button.style.position = "relative";
-        button.appendChild(ripple);
+        const htmlButton = button as HTMLElement;
+        htmlButton.style.position = "relative";
+        htmlButton.appendChild(ripple);
 
         setTimeout(() => {
           ripple.remove();

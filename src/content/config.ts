@@ -72,6 +72,8 @@ const blog = defineCollection({
       publishedAt: z.date().optional(),
       hideToc: z.boolean().default(false),
       draft: z.boolean().default(false),
+      ai: z.boolean().default(true),
+      summary: z.string().optional(),
     }),
 });
 
@@ -154,7 +156,7 @@ const home = defineCollection({
         icon: z.string().optional(),
       })).optional(),
     }),
- });
+});
 
 // 搜索配置集合
 const search = defineCollection({

@@ -61,6 +61,7 @@
     "katex": "^0.16.21",
     "lucide-react": "^0.563.0",
     "marked": "^6.0.0",
+    "p-limit": "^7.2.0",
     "prettier-plugin-astro": "^0.11.0",
     "prettier-plugin-tailwindcss": "^0.4.1",
     "prop-types": "^15.8.1",

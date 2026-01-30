@@ -13,6 +13,9 @@ interface Props {
     message: string;
     tags: string[];
     isUseMarkdown?: boolean;
+    location?: {
+      placeholder?: string;
+    };
   };
 }
 
@@ -117,8 +120,9 @@ const renderedContent = await markdownify(content, true);
         // 添加data-fancybox属性
         img.setAttribute('data-fancybox', 'gallery');
         // 设置图片标题
-        if (img.alt) {
-          img.setAttribute('data-caption', img.alt);
+        const imgElement = img as HTMLImageElement;
+        if (imgElement.alt) {
+          imgElement.setAttribute('data-caption', imgElement.alt);
         }
       });
 
@@ -143,7 +147,7 @@ const renderedContent = await markdownify(content, true);
         ],
         toolbar: true,
         infinite: true,
-        keyboard: true,
+        keyboard: 'auto',
         clickContent: 'zoom',
         clickSlide: 'close',
         // 防止双击放大

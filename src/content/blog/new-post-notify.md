@@ -11,8 +11,8 @@ featured: false
 recommended: true
 hideToc: false
 draft: false
+summary: "新文章通知功能是一个重要的博客用户体验改进功能，它包括以下特点：检测博客中新增的文章和现有文章的内容更新，使用Diff算法高亮显示文章变更，弹出通知提醒读者，支持液态玻璃UI效果和响应式设计，适配不同设备，前端框架为Astro3，0，状态管理采用IndexedDBlocalStorage，RSSS解析使用原生DOMParser，差异比较使用diff库，使用CSS实现现代化的液态玻璃UI效果，在文章页面检测内容更新并高亮显示。"
 ---
-
 <div class="prose prose-lg max-w-none">
 
 ## 功能概述

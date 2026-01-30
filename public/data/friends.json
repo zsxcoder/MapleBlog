@@ -1,18 +1,29 @@
 {
   "categories": [
-    { "id": "cat-tech", "name": "技术博客", "code": "tech", "sort_order": 1 },
-    { "id": "cat-life", "name": "生活记录", "code": "life", "sort_order": 2 }
+    {
+      "id": "cat-tech",
+      "name": "技术博客",
+      "code": "tech",
+      "sort_order": 1
+    },
+    {
+      "id": "cat-life",
+      "name": "生活记录",
+      "code": "life",
+      "sort_order": 2
+    }
   ],
   "links": [
     {
       "id": "1",
       "name": "猫普的精神世界",
-      "url": "https://maplezz.com",
+      "url": "https://maplezz.com/_astro/picture.DavLO-HP_SlHQg.webp",
       "description": "一个独立开发者的精神自留地",
       "avatar": "/favicon/avatar.webp",
       "status": "active",
       "category_code": "tech",
-      "sort_order": 1
+      "sort_order": 1,
+      "responseTime": 3638
     },
     {
       "id": "2",
@@ -22,7 +33,8 @@
       "avatar": "/favicon/logo-192x192.png",
       "status": "active",
       "category_code": "tech",
-      "sort_order": 2
+      "sort_order": 2,
+      "responseTime": 777
     },
     {
       "id": "3",
@@ -32,7 +44,8 @@
       "avatar": "/favicon/logo-192x192.png",
       "status": "active",
       "category_code": "life",
-      "sort_order": 1
+      "sort_order": 1,
+      "responseTime": 777
     }
   ]
 }

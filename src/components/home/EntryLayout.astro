@@ -10,7 +10,10 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { image, imageAlt, title, content, button } = entry.data;
+const { image, imageAlt, hero } = entry.data;
+const title = hero?.title || '';
+const content = hero?.subtitle || '';
+const button = hero?.ctaButton;
 ---
 
 <BaseLayout>
@@ -31,7 +34,7 @@ const { image, imageAlt, title, content, button } = entry.data;
                 loading="eager"
               />
               </div>
-              
+
             )
           }
           <h1 set:html={markdownify(title)} class="mb-4" />
@@ -39,7 +42,7 @@ const { image, imageAlt, title, content, button } = entry.data;
           {
             button && (
               <Button
-                label={button.label}
+                label={button.text}
                 link={button.link}
                 newtab
                 hoverInvert

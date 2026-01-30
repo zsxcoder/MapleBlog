@@ -49,7 +49,13 @@ try {
 // 计算当前页的内容（第一页）
 const indexOfLastEntry = currentPageIndex * entriesPerPage;
 const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
-const currentEntries = moments.slice(indexOfFirstEntry, indexOfLastEntry);
+const currentEntries = moments.slice(indexOfFirstEntry, indexOfLastEntry).map(moment => ({
+  id: moment.id,
+  createdAt: moment.createdAt,
+  message: moment.content,
+  tags: moment.tags,
+  isUseMarkdown: true
+}));
 
 // 计算总页数
 const pageCount: number = Math.ceil(moments.length / entriesPerPage);

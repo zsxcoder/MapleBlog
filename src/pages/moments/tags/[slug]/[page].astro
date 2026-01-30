@@ -148,7 +148,13 @@ const { moments: allMoments, filteredMoments: tagMoments, allMomentsCount: tagMo
 // 计算当前页的内容
 const indexOfLastEntry = currentPageIndex * entriesPerPage;
 const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
-const currentEntries = tagMoments.slice(indexOfFirstEntry, indexOfLastEntry);
+const currentEntries = tagMoments.slice(indexOfFirstEntry, indexOfLastEntry).map(moment => ({
+  id: moment.id,
+  createdAt: moment.createdAt,
+  message: moment.content,
+  tags: moment.tags,
+  isUseMarkdown: true
+}));
 
 // 计算总页数
 const pageCount: number = Math.ceil(tagMoments.length / entriesPerPage);
