@@ -276,6 +276,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Upload link.json to bucket
+        run: |
+          aws s3api put-object \
+            --bucket ${{ secrets.BITIFUL_BUCKET_NAME }} \
+            --key link.json \
+            --body public/data/friends.json \
+            --endpoint-url https://${{ secrets.BITIFUL_S3_ENDPOINT }} \
+            --region ${{ secrets.BITIFUL_REGION }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.BITIFUL_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BITIFUL_SECRET_ACCESS_KEY }}
+
   trigger-vercel-build:
     name: Trigger Vercel build
     needs: check-links-and-update
@@ -298,6 +310,7 @@ jobs:
 - 支持手动触发
 - 执行友链检测脚本
 - 将检测结果提交到仓库
+- 将友链数据上传到S3兼容的云存储桶中
 - 触发Vercel部署钩子，自动更新网站
 
 #### 3. 配置前端显示
@@ -427,6 +440,11 @@ function createFriendLinkCard(link, index) {
 在GitHub仓库的`Settings > Secrets and variables > Actions`中添加以下secret：
 
 - `VERCEL_DEPLOY_HOOK_ID`：Vercel部署钩子ID，用于在检测完成后自动更新网站
+- `BITIFUL_BUCKET_NAME`：S3存储桶名称，用于存储友链数据
+- `BITIFUL_S3_ENDPOINT`：S3服务端点地址
+- `BITIFUL_REGION`：S3存储区域
+- `BITIFUL_ACCESS_KEY_ID`：S3访问密钥ID
+- `BITIFUL_SECRET_ACCESS_KEY`：S3访问密钥
 
 ### 3. 手动执行检测
 
@@ -453,6 +471,7 @@ npx tsx scripts/check-links.ts
 5. **前端可视化**：在友链页面直观显示响应时间和状态
 6. **自动部署**：检测完成后自动更新网站，确保数据实时性
 7. **状态分类**：根据响应时间分类显示，帮助识别慢响应的链接
+8. **云存储备份**：将友链数据上传到S3兼容的云存储桶中，提供数据备份和共享功能
 
 ## 故障排除
 
@@ -473,6 +492,14 @@ npx tsx scripts/check-links.ts
 - 检查`VERCEL_DEPLOY_HOOK_ID`是否正确设置
 - 确保GitHub Actions工作流权限正确
 - 检查Vercel项目是否正常运行
+
+### 4. S3上传失败
+
+- 检查所有S3相关的GitHub Secrets是否正确设置
+- 确保提供的访问密钥有足够的权限上传文件到存储桶
+- 检查S3服务端点地址是否正确
+- 确保存储桶名称和区域设置正确
+- 检查`public/data/friends.json`文件是否存在且格式正确
 
 ## 结语
 
