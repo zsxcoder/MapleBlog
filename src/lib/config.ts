@@ -81,7 +81,7 @@ export const ANNOUNCEMENT_CONFIG = {
 // GitHub 编辑配置
 export const GITHUB_EDIT_CONFIG = {
   enable: true,
-  baseUrl: "https://github.com/zsxjun/MapleBlog/edit/main/src/content/blog"
+  baseUrl: "https://github.com/zsxcoder/MapleBlog/edit/main/src/content/blog"
 } as const;
 
 // 许可证配置
