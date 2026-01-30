@@ -161,68 +161,52 @@ const menu = [
     >
       {
         menu.map((item: any) => (
-          <li data-key={item.id} class={`relative group ${item.children && item.children.length > 0 ? 'dropdown' : ''}`}>
-            {item.children && item.children.length > 0 ? (
-              <a
-                href={item.url}
-                target={item.target || "_self"}
-                class={`flex items-center justify-center h-full my-4 md:my-0 border-none gap-2 px-1 font-bold text-txt-p transition-all duration-300 dark:text-darkmode-txt-p lg:px-2 rounded-xl relative z-10 hover:text-orange-600 dark:hover:text-orange-500 text-lg dropdown-toggle ${
-                  pathname === `${item.url}/` || pathname === item.url
-                    ? "text-orange-500"
-                    : ""
-                }`}
+          <li class={`relative ${item.children && item.children.length > 0 ? 'group dropdown' : ''}`}>
+            <a
+              href={item.url}
+              target={item.target || "_self"}
+              class={`flex items-center justify-center h-full my-4 md:my-0 border-none gap-2 px-1 font-bold text-txt-p transition-all duration-300 dark:text-darkmode-txt-p lg:px-2 rounded-xl relative z-10 hover:text-orange-600 dark:hover:text-orange-500 text-lg ${
+                pathname === `${item.url}/` || pathname === item.url
+                  ? "text-orange-500"
+                  : ""
+              }`}
+            >
+              <GlassButton
+                variant="menu"
+                size="menu"
+                open={pathname === `${item.url}/` || pathname === item.url}
+                className="!text-txt-p dark:!text-darkmode-txt-p w-full flex items-center justify-between"
               >
-                <GlassButton
-                  variant="menu"
-                  size="menu"
-                  open={pathname === `${item.url}/` || pathname === item.url}
-                  className="!text-orange-300  w-full"
-                >
+                <span>
                   {item.icon && <span class="text-sm">{item.icon}</span>}
                   {item.name}
-                  <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </GlassButton>
-              </a>
-            ) : (
-              <a
-                href={item.url}
-                target={item.target || "_self"}
-                class={`flex items-center justify-center h-full my-4 md:my-0 border-none gap-2 px-1 font-bold text-txt-p transition-all duration-300 dark:text-darkmode-txt-p lg:px-2 rounded-xl relative z-10 hover:text-orange-600 dark:hover:text-orange-500 text-lg ${
-                  pathname === `${item.url}/` || pathname === item.url
-                    ? "text-orange-500"
-                    : ""
-                }`}
-              >
-                <GlassButton
-                  variant="menu"
-                  size="menu"
-                  open={pathname === `${item.url}/` || pathname === item.url}
-                  className="!text-orange-300  w-full"
-                >
-                  {item.icon && <span class="text-sm">{item.icon}</span>}
-                  {item.name}
-                </GlassButton>
-              </a>
-            )}
+                </span>
+                {item.children && item.children.length > 0 && (
+                  <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </span>
+                )}
+              </GlassButton>
+            </a>
 
-            {/* 渲染子菜单 */}
+            {/* 二级菜单 */}
             {item.children && item.children.length > 0 && (
-              <ul class="submenu dropdown-menu absolute top-full left-0 mt-1 backdrop-blur-lg bg-white/70 dark:bg-gray-800/70 rounded-lg shadow-lg py-1 opacity-0 visibility-hidden transition-all duration-300 transform origin-top scale-95 hover:scale-100 z-50 md:min-w-[150px] border border-white/30 dark:border-gray-700/30">
-                {item.children.map((child: any) => (
-                  <li data-key={child.id}>
+              <ul class="submenu absolute top-full left-0 mt-2 w-48 rounded-lg bg-white/30 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-gray-600/50 shadow-lg opacity-0 invisible transform scale-95 transition-all duration-300 z-50 group-hover:opacity-100 group-hover:visible group-hover:scale-100">
+                {item.children.map((childItem: any) => (
+                  <li class="px-4 py-2 hover:bg-white/20 dark:hover:bg-gray-700/30 transition-colors duration-300">
                     <a
-                      href={child.url}
-                      target={child.target || "_self"}
-                      class={`block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-md ${
-                        pathname === `${child.url}/` || pathname === child.url
-                          ? "text-orange-500 dark:text-orange-400"
+                      href={childItem.url}
+                      target={childItem.target || "_self"}
+                      class={`block text-sm font-medium text-txt-p dark:text-darkmode-txt-p hover:text-orange-500 dark:hover:text-orange-400 transition-colors ${
+                        pathname === `${childItem.url}/` || pathname === childItem.url
+                          ? "text-orange-500"
                           : ""
                       }`}
                     >
-                      {child.icon && <span class="mr-2">{child.icon}</span>}
-                      {child.name}
+                      {childItem.icon && <span class="text-xs mr-2">{childItem.icon}</span>}
+                      {childItem.name}
                     </a>
                   </li>
                 ))}
@@ -297,7 +281,7 @@ const menu = [
         display: block !important;
       }
 
-      /* 移动端二级菜单始终显示 */
+      /* 移动端二级菜单样式 */
       .submenu {
         position: static !important;
         opacity: 1 !important;
@@ -310,12 +294,23 @@ const menu = [
         margin-left: 1rem;
         border-left: 2px solid rgba(249, 115, 22, 0.3);
         padding-left: 0.5rem;
+        display: none;
+      }
+
+      /* 激活状态的子菜单显示 */
+      .dropdown.active .submenu {
+        display: block;
       }
 
       /* 移动端一级菜单项样式调整 */
       .group > a {
         /* border-bottom: 1px solid rgba(0, 0, 0, 0.1); */
         margin-bottom: 0;
+      }
+
+      /* 移动端菜单图标旋转效果 */
+      .dropdown.active .glass-button span:last-child svg {
+        transform: rotate(180deg);
       }
     }
 
@@ -362,8 +357,7 @@ const menu = [
       // 移除所有激活状态和指示器
       menuItems.forEach((item) => {
         item.classList.remove("text-orange-500", "hover-active");
-        // 只有当item有子元素时才修改className，避免访问undefined
-        if (item.children.length > 0) {
+        if (item.children[0]) {
           item.children[0].className =
             "!gap-[inherit] !px-4 !py-2 border border-white/0 w-full";
         }
@@ -380,11 +374,13 @@ const menu = [
       });
 
       // 添加当前页面的激活状态
-      if (activeItem && activeItem.children.length > 0) {
+      if (activeItem) {
         // 设置文本颜色
         activeItem.classList.add("text-orange-500");
-        activeItem.children[0].className +=
-          " glass-button glass-button--menu glass-button--menu dark:!text-orange-300 dark:!bg-black/30 dark:!border-gray-400  w-full";
+        if (activeItem.children[0]) {
+          activeItem.children[0].className +=
+            " glass-button glass-button--menu glass-button--menu dark:!text-orange-500 dark:!bg-black/30 dark:!border-gray-400  w-full";
+        }
       }
 
       // 为所有菜单项添加鼠标悬浮事件监听器
@@ -400,8 +396,8 @@ const menu = [
     }
 
     // 鼠标悬浮进入事件处理函数
-    function handleMenuItemHover(event: { currentTarget: any; }) {
-      const item = event.currentTarget;
+    function handleMenuItemHover(event: Event) {
+      const item = event.currentTarget as HTMLElement;
       const currentPath = window.location.pathname;
       const href = item.getAttribute("href");
 
@@ -411,17 +407,17 @@ const menu = [
         currentPath === href + "/" ||
         (href && href !== "/" && currentPath.indexOf(href) !== -1);
 
-      // 如果不是当前页面且有子元素，添加悬浮激活样式
-      if (!isCurrentPage && item.children.length > 0) {
-        item.classList.add("text-orange-500", "hover-active");
+      // 如果不是当前页面，添加悬浮激活样式
+      if (!isCurrentPage && item.children[0]) {
+        item.classList.add("hover-active");
         item.children[0].className +=
-          " glass-button glass-button--menu glass-button--menu dark:!text-orange-300 dark:!bg-black/30 dark:!border-gray-400  w-full";
+          " glass-button glass-button--menu glass-button--menu dark:!bg-black/30 dark:!border-gray-400  w-full";
       }
     }
 
     // 鼠标悬浮离开事件处理函数
-    function handleMenuItemLeave(event: { currentTarget: any; }) {
-      const item = event.currentTarget;
+    function handleMenuItemLeave(event: Event) {
+      const item = event.currentTarget as HTMLElement;
       const currentPath = window.location.pathname;
       const href = item.getAttribute("href");
 
@@ -431,23 +427,27 @@ const menu = [
         currentPath === href + "/" ||
         (href && href !== "/" && currentPath.indexOf(href) !== -1);
 
-      // 如果不是当前页面且有子元素，移除悬浮激活样式
-      if (!isCurrentPage && item.children.length > 0) {
-        item.classList.remove("text-orange-500", "hover-active");
+      // 如果不是当前页面，移除悬浮激活样式
+      if (!isCurrentPage && item.children[0]) {
+        item.classList.remove("hover-active");
         item.children[0].className =
           "!gap-[inherit] !px-4 !py-2 border border-white/0 w-full";
       }
     }
 
-    // 移动端菜单切换
-    document.addEventListener("astro:page-load", function () {
+    // 处理移动端菜单的函数
+    function setupMobileMenu() {
       const navToggle = document.getElementById("nav-toggle");
       const navMenu = document.getElementById("nav-menu");
 
       // 监听导航切换
       if (navToggle && navMenu) {
-        (navToggle as HTMLInputElement).addEventListener("change", function () {
-          if ((this as HTMLInputElement).checked) {
+        // 移除之前的事件监听器，避免重复绑定
+        const navToggleElement = navToggle as HTMLInputElement;
+
+        // 重新绑定导航切换事件
+        navToggleElement.addEventListener("change", function () {
+          if (this.checked) {
             navMenu.classList.remove("hidden");
             navMenu.classList.add("show");
           } else {
@@ -457,42 +457,82 @@ const menu = [
         });
       }
 
-      // 点击菜单项后关闭移动端菜单
+      // 点击菜单项后关闭移动端菜单（仅当不是父菜单时）
       const menuLinks = document.querySelectorAll("#nav-menu a");
       menuLinks.forEach((link) => {
-        link.addEventListener("click", function () {
-          if (navToggle && navMenu) {
-            (navToggle as HTMLInputElement).checked = false;
-            navMenu.classList.add("hidden");
-            navMenu.classList.remove("show");
+        // 移除之前的事件监听器，避免重复绑定
+        const newLink = link.cloneNode(true) as HTMLElement;
+        link.parentNode?.replaceChild(newLink, link);
+
+        newLink.addEventListener("click", function (e: Event) {
+          const parentLi = this.closest("li");
+          const isDropdown = parentLi && parentLi.classList.contains("dropdown");
+          const isSubmenuItem = parentLi && parentLi.parentElement && parentLi.parentElement.classList.contains("submenu");
+
+          // 只有当不是下拉菜单或者是下拉菜单的子项时，才关闭菜单
+          // 对于下拉菜单的一级菜单项（即展开/折叠按钮），不关闭菜单
+          if (!isDropdown || isSubmenuItem) {
+            if (navToggle && navMenu) {
+              (navToggle as HTMLInputElement).checked = false;
+              navMenu.classList.add("hidden");
+              navMenu.classList.remove("show");
+            }
           }
         });
       });
 
-      /* 移动端处理：移除二级菜单的点击切换逻辑，让所有二级菜单始终显示 */
-      // 在移动端，二级菜单通过CSS始终显示，无需JavaScript切换
-
-      // 下拉菜单交互
+      // 移动端多级菜单展开/折叠逻辑
       const dropdownItems = document.querySelectorAll(".dropdown");
       dropdownItems.forEach((dropdown) => {
-        const toggle = dropdown.querySelector(".dropdown-toggle");
-        const menu = dropdown.querySelector(".dropdown-menu");
+        const toggle = dropdown.querySelector("a") as HTMLElement;
+        const submenu = dropdown.querySelector(".submenu") as HTMLElement;
 
-        if (toggle && menu) {
-          toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            dropdown.classList.toggle("active");
-          });
+        if (toggle && submenu) {
+          // 移除之前的事件监听器，避免重复绑定
+          const newToggle = toggle.cloneNode(true) as HTMLElement;
+          toggle.parentNode?.replaceChild(newToggle, toggle);
 
-          // 点击外部关闭下拉菜单
-          document.addEventListener("click", function (e) {
-            if (!dropdown.contains(e.target as Node)) {
-              dropdown.classList.remove("active");
+          // 处理菜单展开/折叠的函数
+          function handleMenuToggle(e: Event) {
+            // 检查是否在移动端
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+              e.preventDefault();
+              e.stopPropagation();
+
+              // 切换激活状态
+              dropdown.classList.toggle("active");
+
+              // 切换子菜单的显示/隐藏
+              const isActive = dropdown.classList.contains("active");
+              if (isActive) {
+                submenu.classList.add("show");
+                submenu.style.display = "block";
+              } else {
+                submenu.classList.remove("show");
+                submenu.style.display = "none";
+              }
             }
-          });
+          }
+
+          // 添加点击事件监听
+          newToggle.addEventListener("click", handleMenuToggle);
+
+          // 添加触摸事件监听，解决移动端触摸问题
+          newToggle.addEventListener("touchstart", handleMenuToggle);
         }
       });
-    });
+    }
+
+    // 页面加载时设置移动端菜单
+    document.addEventListener("astro:page-load", setupMobileMenu);
+
+    // 初始加载时也设置一次
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupMobileMenu);
+    } else {
+      setupMobileMenu();
+    }
 
     // 随机文章按钮点击事件
     document.addEventListener("astro:page-load", function () {

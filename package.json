@@ -25,7 +25,8 @@
     "preview": "astro preview",
     "serve": "astro preview",
     "clean": "rm -rf dist",
-    "build:analyze": "astro build --verbose"
+    "build:analyze": "astro build --verbose",
+    "generate:note": "node scripts/generate-note.js"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

@@ -25,7 +25,7 @@ const {
 const { title, createdAt, image, imageAlt } = entry.data;
 
 // 检查是否有自定义图片
-const hasCustomImage = !!(image && typeof image === "object" && "src" in image);
+const hasCustomImage = !!(image && (typeof image === "object" && "src" in image || typeof image === "string"));
 const displayImageAlt = imageAlt || `${title} - 推荐阅读`;
 
 const entryDate = createdAt ? formatDate(createdAt) : null;
@@ -49,18 +49,31 @@ const estimatedReadingTime = readingTime(entry.body || "", 1);
           class={`flex-shrink-0 rounded-[18px] overflow-hidden ${compact ? "w-14 h-14" : "w-16 h-16"}  block lg:hidden 2xl:block`}
         >
           {hasCustomImage ? (
-            <Image
-              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              src={image}
-              alt={displayImageAlt}
-              inferSize={true}
-              loading="lazy"
-              format="webp"
-              quality={20}
-              fetchpriority="high"
-              decoding="async"
-              style={`width: ${compact ? "64x" : "64px"}; height: ${compact ? "64px" : "64px"};`}
-            />
+            typeof image === "string" ? (
+              // 处理外链图片
+              <img
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                src={image}
+                alt={displayImageAlt}
+                loading="lazy"
+                decoding="async"
+                style={`width: ${compact ? "64px" : "64px"}; height: ${compact ? "64px" : "64px"};`}
+              />
+            ) : (
+              // 处理本地图片
+              <Image
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                src={image}
+                alt={displayImageAlt}
+                inferSize={true}
+                loading="lazy"
+                format="webp"
+                quality={20}
+                fetchpriority="high"
+                decoding="async"
+                style={`width: ${compact ? "64px" : "64px"}; height: ${compact ? "64px" : "64px"};`}
+              />
+            )
           ) : (
             <PlaceholderImage
               title={title}

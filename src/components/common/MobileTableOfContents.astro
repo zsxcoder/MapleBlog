@@ -1,0 +1,197 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  tocDepth: number;
+}
+
+const { headings, tocDepth } = Astro.props;
+
+// 过滤出符合深度要求的标题
+const filteredHeadings = headings.filter((heading) => heading.depth <= tocDepth);
+
+// 检查是否有标题
+const hasHeadings = filteredHeadings.length > 0;
+---
+
+{hasHeadings && (
+  <div class="mobile-toc-container fixed bottom-32 right-4 z-50">
+    {/* 移动端目录按钮 */}
+    <button
+      id="mobile-toc-toggle"
+      class="w-12 h-12 rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-md border border-white/20 dark:border-gray-600/50 shadow-lg flex items-center justify-center hover:bg-white/90 dark:hover:bg-black/90 transition-all duration-300"
+      aria-label="展开目录"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h4.175q.275-.875 1.075-1.437T12 1q1 0 1.788.563T14.85 3H19q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm0-2h14V5h-2v3H7V5H5zm7-14q.425 0 .713-.288T13 4t-.288-.712T12 3t-.712.288T11 4t.288.713T12 5"/>
+      </svg>
+    </button>
+
+    {/* 移动端目录内容 */}
+    <div
+      id="mobile-toc-content"
+      class="hidden absolute bottom-full right-[5px] mb-4 w-[80vw] max-w-[260px] max-h-[40vh] overflow-y-auto rounded-lg bg-white/90 dark:bg-black/90 backdrop-blur-md border border-white/20 dark:border-gray-600/50 shadow-lg p-3"
+    >
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold text-txt-p dark:text-darkmode-txt-p">内容导航</h3>
+        <button
+          id="mobile-go-to-comments-btn"
+          class="w-8 h-8 rounded-full bg-white/60 dark:bg-black/60 backdrop-blur-sm border border-white/20 dark:border-gray-600/50 flex items-center justify-center hover:bg-white/80 dark:hover:bg-black/80 transition-all duration-300"
+          aria-label="跳转到评论区"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 14h12v-2H6zm0-3h12V9H6zm0-3h12V6H6zM4 18q-.825 0-1.412-.587T2 16V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v18l-4-4z"/>
+          </svg>
+        </button>
+      </div>
+      <ul class="space-y-1">
+        {filteredHeadings.map((heading) => (
+          <li class={`${heading.depth === 2 ? "ml-0" : "ml-4"}`}>
+            <a
+              href={`#${heading.slug}`}
+              class="text-sm text-txt-p dark:text-darkmode-txt-p hover:text-orange-500 dark:hover:text-orange-400 transition-colors block py-1"
+              data-mobile-toc-link
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+)}
+
+<script>
+  // 计算头部实际高度的函数
+  function getHeaderHeight() {
+    const header = document.querySelector('header');
+    if (header) {
+      const headerHeight = header.offsetHeight;
+      return headerHeight + 32; // 增加更多缓冲区
+    }
+    return 140; // 增加默认值
+  }
+
+  // 平滑滚动到锚点位置并添加偏移量
+  function setupMobileTocLinks() {
+    const tocLinks = document.querySelectorAll('[data-mobile-toc-link]');
+    const tocContent = document.getElementById('mobile-toc-content');
+
+    tocLinks.forEach(link => {
+      // 移除之前的事件监听器（如果存在）
+      const newLink = link.cloneNode(true);
+      link.parentNode?.replaceChild(newLink, link);
+
+      newLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = e.currentTarget as HTMLElement;
+        const href = target.getAttribute('href');
+        if (!href) return;
+
+        // 关闭目录
+        if (tocContent) {
+          tocContent.classList.add('hidden');
+        }
+
+        const targetId = href.substring(1);
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+          // 获取元素相对于视口的位置
+          const rect = targetElement.getBoundingClientRect();
+          const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const headerHeight = getHeaderHeight();
+
+          // 计算目标滚动位置：当前滚动位置 + 元素距离视口顶部的距离 - 头部高度
+          const targetScrollTop = currentScrollTop + rect.top - headerHeight;
+
+          window.scrollTo({
+            top: Math.max(0, targetScrollTop),
+            behavior: 'smooth'
+          });
+
+          // 更新URL hash
+          history.pushState(null, "", `#${targetId}`);
+        }
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', function() {
+    const tocToggle = document.getElementById('mobile-toc-toggle');
+    const tocContent = document.getElementById('mobile-toc-content');
+
+    if (tocToggle && tocContent) {
+      tocToggle.addEventListener('click', function() {
+        tocContent.classList.toggle('hidden');
+      });
+
+      // 点击页面其他地方关闭目录
+      document.addEventListener('click', function(e) {
+        if (!tocToggle.contains(e.target as Node) && !tocContent.contains(e.target as Node)) {
+          tocContent.classList.add('hidden');
+        }
+      });
+    }
+
+    // 设置移动端目录链接的点击跳转功能
+    setupMobileTocLinks();
+
+    // 设置移动端直达评论按钮的点击跳转功能
+    const mobileGoToCommentsBtn = document.getElementById('mobile-go-to-comments-btn');
+    if (mobileGoToCommentsBtn) {
+      mobileGoToCommentsBtn.addEventListener('click', function() {
+        // 关闭目录
+        if (tocContent) {
+          tocContent.classList.add('hidden');
+        }
+
+        // 尝试多种方式找到评论区
+        const commentsSection = document.getElementById('tcomment') ||
+                               document.querySelector('#tcomment') ||
+                               document.querySelector('.twikoo');
+        if (commentsSection) {
+          // 使用更可靠的滚动方法
+          commentsSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          // 同时使用window.scrollTo作为备选方案
+          const rect = commentsSection.getBoundingClientRect();
+          const headerHeight = getHeaderHeight();
+          window.scrollTo({
+            top: window.pageYOffset + rect.top - headerHeight,
+            behavior: 'smooth'
+          });
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  .mobile-toc-container {
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  #mobile-toc-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  #mobile-toc-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #mobile-toc-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  #mobile-toc-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+import { SITE_INFO } from '@lib/config';
+
+interface Props {
+  title: string;
+  slug: string;
+  pubDate: string | Date;
+  class?: string;
+}
+
+const { title, slug, pubDate, class: className } = Astro.props;
+
+const pubYear = typeof pubDate === 'string' ? new Date(pubDate).getFullYear() : pubDate.getFullYear();
+---
+
+<div class={`p-4 rounded-lg bg-[var(--license-block-bg)] border border-[var(--line-divider)] ${className || ''}`}>
+  <div class="flex items-start gap-3">
+    <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center flex-shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white dark:text-black/70">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+      </svg>
+    </div>
+    <div class="flex-1">
+      <p class="text-black/80 dark:text-white/80 text-sm mb-2">
+        © {pubYear} {SITE_INFO.SITE_NAME} • {title}
+      </p>
+      <p class="text-black/60 dark:text-white/60 text-xs">
+        本作品采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer" class="text-[var(--primary)] hover:underline">
+          CC BY-NC-SA 4.0
+        </a> 国际许可协议进行许可。
+      </p>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ import BaseLayout from "@components/base/BaseLayout.astro";
 import { plainify } from "@lib/textConverter";
 import { render, type CollectionEntry, getCollection } from "astro:content";
 import TableOfContents from "@components/common/TableOfContents.astro";
+import MobileTableOfContents from "@components/common/MobileTableOfContents.astro";
 import EntryHeader from "@components/common/EntryHeader.astro";
 import "../../styles/markdown.scss";
 import AuthorImg from "@assets/picture.webp";
@@ -13,7 +14,8 @@ import Comment from "@components/base/Comment.astro";
 import ShareButton from "@components/blog/ShareButton.astro";
 import RecommendedReadCard from "@components/blog/RecommendedReadCard.astro";
 import type { BlogEntry } from "@/types";
-import { SITE_INFO } from "@lib/config";
+import { SITE_INFO, GITHUB_EDIT_CONFIG, LICENSE_CONFIG } from "@lib/config";
+// import License from "@components/misc/License.astro";
 
 interface Props {
   entry: CollectionEntry<"blog">;
@@ -141,6 +143,12 @@ const recommendedPosts = allBlogPosts
             showTags
           />
         </section>
+
+        <!-- 移动端目录组件 -->
+        {!actuallyHideToc && (
+          <MobileTableOfContents headings={headings} tocDepth={tocDepth} />
+        )}
+
         <LiquidGlassLess
           containerType="section"
           heavy
@@ -152,6 +160,75 @@ const recommendedPosts = allBlogPosts
             <slot />
           </div>
         </LiquidGlassLess>
+
+
+        <!-- 文章反馈与编辑区域 -->
+        <div class="mb-4 p-4 rounded-lg bg-[var(--license-block-bg)] border border-[var(--line-divider)] onload-animation">
+          <!-- 反馈区域 -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.75rem] text-white dark:text-black/70">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <path d="M12 17h.01"></path>
+                </svg>
+              </div>
+              <p class="text-black/80 dark:text-white/80 text-sm">这篇文章是否对你有帮助？</p>
+            </div>
+            <div class="flex gap-2">
+              <a href="/posts/pin/" class="group flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--btn-regular-bg)] hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)] text-[var(--btn-content)] text-xs font-medium transition-all active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] group-hover:scale-110 transition-transform">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                联系
+              </a>
+              <a href="/donate/" class="group flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--primary)] hover:bg-[oklch(0.65_0.16_var(--hue))] active:bg-[oklch(0.60_0.18_var(--hue))] text-white dark:text-black/80 text-xs font-medium transition-all active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] group-hover:scale-110 transition-transform">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                赞助
+              </a>
+            </div>
+          </div>
+
+          {GITHUB_EDIT_CONFIG.enable && (
+            <>
+              <!-- 分隔线 -->
+              <div class="border-t border-[var(--line-divider)] my-3"></div>
+
+              <!-- GitHub编辑区域 -->
+              <div class="flex items-start gap-3">
+                <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] text-white dark:text-black/70">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-black/80 dark:text-white/80 text-sm mb-1">发现错误或想要改进这篇文章？</p>
+                  <a
+                    href={`${GITHUB_EDIT_CONFIG.baseUrl}/${entry.id.replace('/blog/', '')}.md`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 text-[var(--primary)] hover:text-[oklch(0.65_0.16_var(--hue))] text-sm font-medium transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem]">
+                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                    在 GitHub 上编辑此页
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.75rem]">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         <!-- 文章信息区 -->
         <!-- 文章底部信息卡片 -->
         <div class="relative mt-16">
@@ -218,7 +295,7 @@ const recommendedPosts = allBlogPosts
                   class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4"
                 >
                   <span>
-                    © 2025 by
+                    © 2026 - {new Date().getFullYear()} by
                     <a href={SITE_INFO.URL}>{SITE_INFO.SITE_NAME}</a>
                      本文基于
                     <a
@@ -293,6 +370,18 @@ const recommendedPosts = allBlogPosts
     >
       <TableOfContents headings={headings} tocDepth={tocDepth} />
 
+      <!-- 评论区跳转按钮 -->
+      <div class="liquidGlass-wrapper button w-12 h-12 rounded-full">
+        <div class="liquidGlass-effect-h"></div>
+        <div class="liquidGlass-tint-h"></div>
+        <div class="liquidGlass-shine"></div>
+        <button id="go-to-comments-btn" class="z-50 w-full h-full rounded-full flex items-center justify-center transition-all duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#0284c7">
+            <path d="M6 14h12v-2H6zm0-3h12V9H6zm0-3h12V6H6zM4 18q-.825 0-1.412-.587T2 16V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v18l-4-4z"/>
+          </svg>
+        </button>
+      </div>
+
       <!-- 推荐阅读模块 -->
       {
         recommendedPosts.length > 0 && (
@@ -343,3 +432,89 @@ const recommendedPosts = allBlogPosts
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* 评论区跳转按钮样式 */
+  #go-to-comments-btn {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  #go-to-comments-btn:hover {
+    transform: scale(1.1);
+  }
+
+  #go-to-comments-btn.hide {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+  }
+</style>
+
+<script>
+  // 评论区跳转按钮功能
+  let goToCommentsBtn = document.getElementById('go-to-comments-btn');
+
+  function refreshControlRefs() {
+    goToCommentsBtn = document.getElementById('go-to-comments-btn');
+    console.log('refreshControlRefs called:', goToCommentsBtn);
+  }
+
+  // 点击按钮跳转到评论区
+  function setupGoToCommentsBtn() {
+    refreshControlRefs();
+
+    if (goToCommentsBtn) {
+      console.log('setupGoToCommentsBtn called, adding event listener');
+      // 先移除可能存在的事件监听器，避免重复添加
+      goToCommentsBtn.removeEventListener('click', handleGoToComments);
+      // 添加新的事件监听器
+      goToCommentsBtn.addEventListener('click', handleGoToComments);
+    }
+  }
+
+  // 点击事件处理函数
+  function handleGoToComments() {
+    console.log('Button clicked, trying to find comments section');
+    // 尝试多种方式找到评论区
+    const commentsSection = document.getElementById('tcomment') ||
+                           document.querySelector('#tcomment') ||
+                           document.querySelector('.twikoo');
+    console.log('Found comments section:', commentsSection);
+    if (commentsSection) {
+      console.log('Scrolling to comments section');
+      // 使用更可靠的滚动方法
+      commentsSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+      // 同时使用window.scrollTo作为备选方案
+      const rect = commentsSection.getBoundingClientRect();
+      window.scrollTo({
+        top: window.pageYOffset + rect.top - 100, // 减去100px，避免被导航栏遮挡
+        behavior: 'smooth'
+      });
+    } else {
+      console.log('Comments section not found');
+    }
+  }
+
+  // 初始化
+  function init() {
+    console.log('init called');
+    setupGoToCommentsBtn();
+  }
+
+  // 使用Astro特定的事件
+  document.addEventListener('astro:page-load', init);
+
+  // 同时保留标准事件，确保兼容性
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // 添加页面加载完成后的延迟初始化，确保所有元素都已渲染
+  setTimeout(init, 1000);
+</script>

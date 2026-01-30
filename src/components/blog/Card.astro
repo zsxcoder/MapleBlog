@@ -19,7 +19,7 @@ const { title, description, createdAt, categories, tags, image, imageAlt } =
 const descriptionLength = 200;
 
 // 检查是否有自定义图片
-const hasCustomImage = !!(image && typeof image === "object" && "src" in image);
+const hasCustomImage = !!(image && (typeof image === "object" && "src" in image || typeof image === "string"));
 const displayImageAlt = imageAlt || `${title} - 默认图片`;
 
 const entryDate = createdAt ? formatDate(createdAt) : null;
@@ -40,17 +40,29 @@ const entryDescription =
       <a href={`/blog/${entry.id}`} class="block w-full h-full">
         {hasCustomImage ? (
           <>
-            <Image
-              class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105"
-              src={image}
-              alt={displayImageAlt}
-              inferSize={true}
-              loading="lazy"
-              format="webp"
-              quality={50}
-              decoding="async"
-              fetchpriority="high"
-            />
+            {typeof image === "string" ? (
+              // 处理外链图片
+              <img
+                class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105"
+                src={image}
+                alt={displayImageAlt}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              // 处理本地图片
+              <Image
+                class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105"
+                src={image}
+                alt={displayImageAlt}
+                inferSize={true}
+                loading="lazy"
+                format="webp"
+                quality={50}
+                decoding="async"
+                fetchpriority="high"
+              />
+            )}
             <!-- 简化的渐变遮罩 -->
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300"

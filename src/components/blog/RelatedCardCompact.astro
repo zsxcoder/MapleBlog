@@ -34,7 +34,8 @@ const {
 const descriptionLength = 80; // 更精简的描述长度
 
 // 使用默认图片如果没有设置图片
-const displayImage = image && typeof image === "object" && "src" in image ? image : defaultImage;
+const hasCustomImage = !!(image && (typeof image === "object" && "src" in image || typeof image === "string"));
+const displayImage = hasCustomImage ? image : defaultImage;
 const displayImageAlt = imageAlt || `${title} - 默认图片`;
 
 const entryDate = createdAt ? formatDate(createdAt) : null;
@@ -46,17 +47,29 @@ const entryDescription = description;
 >
   <a href={`/blog/${slug(entry.data.title)}`} class="block w-full h-full relative">
     <!-- 背景图片 -->
-    <Image
-      class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105"
-      src={displayImage}
-      alt={displayImageAlt}
-      width={400}
-      height={300}
-      loading="lazy"
-      format="webp"
-      quality={75}
-      decoding="async"
-    />
+    {typeof displayImage === "string" ? (
+      // 处理外链图片
+      <img
+        class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105"
+        src={displayImage}
+        alt={displayImageAlt}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      // 处理本地图片
+      <Image
+        class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105"
+        src={displayImage}
+        alt={displayImageAlt}
+        width={400}
+        height={300}
+        loading="lazy"
+        format="webp"
+        quality={75}
+        decoding="async"
+      />
+    )}
 
     <!-- 渐变遮罩层 -->
     <div

@@ -87,16 +87,27 @@ tags?.sort((a: string, b: string) => a.localeCompare(b));
         textClass={`${image && showImage ? "" : "border border-white/10 dark:border-white/5"}`}
       >
         {/* 背景图片层 */}
-        {image && typeof image === "object" && "src" in image && showImage && (
+        {image && showImage && (
           <div class="absolute inset-0">
-            <Image
-              class="w-full h-full object-cover rounded-[35px]"
-              src={image}
-              alt={imageAlt || ""}
-              height={280}
-              width={1200}
-              loading="eager"
-            />
+            {typeof image === "string" ? (
+              // 处理外链图片
+              <img
+                class="w-full h-full object-cover rounded-[35px]"
+                src={image}
+                alt={imageAlt || ""}
+                loading="eager"
+              />
+            ) : (
+              // 处理本地图片
+              <Image
+                class="w-full h-full object-cover rounded-[35px]"
+                src={image}
+                alt={imageAlt || ""}
+                height={280}
+                width={1200}
+                loading="eager"
+              />
+            )}
             {/* 渐变遮罩层，确保文字可读性 */}
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/0" />
           </div>

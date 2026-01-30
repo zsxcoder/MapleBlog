@@ -77,3 +77,14 @@ export const ANNOUNCEMENT_CONFIG = {
   link: "/about",
   linkText: "了解更多"
 } as const;
+
+// GitHub 编辑配置
+export const GITHUB_EDIT_CONFIG = {
+  enable: true,
+  baseUrl: "https://github.com/zsxjun/MapleBlog/edit/main/src/content/blog"
+} as const;
+
+// 许可证配置
+export const LICENSE_CONFIG = {
+  enable: true
+} as const;
