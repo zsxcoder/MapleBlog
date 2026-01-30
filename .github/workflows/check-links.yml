@@ -21,10 +21,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install deps
-        run: npm install p-limit tsx
+        run: pnpm add p-limit tsx
 
       - name: Run link check
         run: npx tsx scripts/check-links.ts
