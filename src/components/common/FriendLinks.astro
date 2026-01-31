@@ -216,7 +216,7 @@
     const avatar = link && link.avatar ? link.avatar : '/favicon/logo-192x192.png';
     const status = link && link.status ? link.status : 'active';
     const responseTime = link && link.responseTime ? link.responseTime : null;
-    
+
     // 计算响应时间颜色
     function getResponseTimeColor(time) {
       if (time === null) return 'text-gray-400';
@@ -225,14 +225,14 @@
       if (time < 2000) return 'text-orange-500';
       return 'text-red-500';
     }
-    
+
     // 格式化响应时间
     function formatResponseTime(time) {
       if (time === null) return '未知';
       if (time < 1000) return `${time}ms`;
       return `${(time / 1000).toFixed(1)}s`;
     }
-    
+
     return `
       <div class="friend-card glass h-full rounded-[18px] overflow-hidden transition-all duration-300 group backdrop-blur-md relative">
         <a href="${url}" target="_blank" rel="external nofollow noopener noreferrer" class="block h-full p-4 no-underline">
@@ -258,7 +258,7 @@
                       : ""
               }
             </div>
-            
+
             <!-- 内容区域 -->
             <div class="flex-1 min-w-0">
               <!-- 网站名称 -->
@@ -272,14 +272,14 @@
                   </span>
                 ` : ''}
               </div>
-              
+
               <!-- 网站描述 -->
               <p class="friend-description text-sm text-txt-light dark:text-darkmode-txt-light line-clamp-2 leading-relaxed">
                 ${description}
               </p>
             </div>
           </div>
-          
+
           <!-- 悬浮效果 -->
           <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[18px]"></div>
         </a>

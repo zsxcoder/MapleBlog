@@ -123,7 +123,7 @@ export function showToast(options: ToastOptions): HTMLElement {
 
   const contentElement = document.createElement('p');
   contentElement.className = 'text-gray-700 text-sm leading-relaxed';
-  contentElement.setHTMLUnsafe(content);
+  contentElement.innerHTML = content;
   textDiv.appendChild(contentElement);
 
   contentArea.appendChild(textDiv);

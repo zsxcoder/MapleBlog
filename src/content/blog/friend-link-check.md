@@ -3,6 +3,7 @@ title: 在MapleBlog中实现友链检测功能
 description: 详细介绍如何在MapleBlog Astro博客中添加友链检测功能，包括状态监控、响应时间统计和前端显示
 createdAt: 2026-01-30
 updatedAt: 2026-01-30
+image: "https://cdn.jsdmirror.com/gh/zsxcoder/github-img@main/img/links-check.avif"
 categories:
   - 技术
   - 博客优化

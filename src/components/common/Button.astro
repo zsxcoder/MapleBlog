@@ -25,7 +25,7 @@ const {
 const variantMap = {
   primary: "info",
   secondary: "secondary",
-};
+} as const;
 
 const variant = variantMap[type] || "primary";
 const size = type === "primary" ? "md" : "sm";
@@ -38,7 +38,7 @@ const size = type === "primary" ? "md" : "sm";
       target={newtab ? "_blank" : ""}
       class="no-underline inline-block transform hover:scale-102 transition-transform duration-300"
     >
-      <GlassButton variant={variant} size={size} class="font-bold">
+      <GlassButton variant={variant} size={size} className="font-bold">
         {label}
       </GlassButton>
     </a>

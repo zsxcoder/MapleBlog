@@ -1,67 +1,67 @@
 name: 🔗 Friend Links Check
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "public/data/friends.json"
-  schedule:
-    - cron: "0 16 * * *"
-  workflow_dispatch:
+    push:
+        branches:
+            - main
+        paths:
+            - "public/data/friends.json"
+    schedule:
+        - cron: "0 16 * * *"
+    workflow_dispatch:
 
 jobs:
-  check-links-and-update:
-    name: Link Check & Upload
-    runs-on: ubuntu-latest
+    check-links-and-update:
+        name: Link Check & Upload
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
 
-      - name: Install deps
-        run: npm install p-limit@6 tsx
+            - name: Install deps
+              run: npm install p-limit@6 tsx
 
-      - name: Run link check
-        run: npx tsx scripts/check-links.ts
+            - name: Run link check
+              run: npx tsx scripts/check-links.ts
 
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/friends.json
-          git commit -m "Update friend links response times"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Commit and push changes
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                  git add public/data/friends.json
+                  git commit -m "Update friend links response times"
+                  git push
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload link.json to bucket
-        run: |
-          aws s3api put-object \
-            --bucket ${{ secrets.BITIFUL_BUCKET_NAME }} \
-            --key link.json \
-            --body public/data/friends.json \
-            --endpoint-url https://${{ secrets.BITIFUL_S3_ENDPOINT }} \
-            --region ${{ secrets.BITIFUL_REGION }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.BITIFUL_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.BITIFUL_SECRET_ACCESS_KEY }}
+            - name: Upload link.json to bucket
+              run: |
+                  aws s3api put-object \
+                    --bucket ${{ secrets.BITIFUL_BUCKET_NAME }} \
+                    --key link.json \
+                    --body public/data/friends.json \
+                    --endpoint-url https://${{ secrets.BITIFUL_S3_ENDPOINT }} \
+                    --region ${{ secrets.BITIFUL_REGION }}
+              env:
+                  AWS_ACCESS_KEY_ID: ${{ secrets.BITIFUL_ACCESS_KEY_ID }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets.BITIFUL_SECRET_ACCESS_KEY }}
 
-  trigger-vercel-build:
-    name: Trigger Vercel build
-    needs: check-links-and-update
-    runs-on: ubuntu-latest
+    trigger-vercel-build:
+        name: Trigger Vercel build
+        needs: check-links-and-update
+        runs-on: ubuntu-latest
 
-    if: ${{ needs.check-links-and-update.result == 'success' }}
+        if: ${{ needs.check-links-and-update.result == 'success' }}
 
-    steps:
-      - name: Update Vercel
-        run: |
-          curl -X POST \
-          "https://api.vercel.com/v1/integrations/deploy/${{ secrets.VERCEL_DEPLOY_HOOK_ID }}" \
-          -H "Content-Type: application/json" \
-          -d '{"name": "Friend Links Check"}'
+        steps:
+            - name: Update Vercel
+              run: |
+                  curl -X POST \
+                  "https://api.vercel.com/v1/integrations/deploy/${{ secrets.VERCEL_DEPLOY_HOOK_ID }}" \
+                  -H "Content-Type: application/json" \
+                  -d '{"name": "Friend Links Check"}'

@@ -64,7 +64,9 @@ const entries: BlogEntry[] = allPosts
       imageAlt: post.data.imageAlt,
       recommended: post.data.recommended,
       views: post.data.views,
-      hideToc: post.data.hideToc
+      hideToc: post.data.hideToc,
+      ai: post.data.ai,
+      encrypted: post.data.encrypted
     }
   } as BlogEntry))
   .sort((a, b) => {

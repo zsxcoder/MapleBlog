@@ -135,26 +135,7 @@ const renderedContent = await markdownify(content, true);
       }
 
       // 初始化fancybox
-      Fancybox.bind('[data-fancybox="gallery"]', {
-        // 配置选项
-        animationEffect: 'zoom', // 动画效果
-        transitionEffect: 'slide', // 过渡效果
-        buttons: [
-          'zoom',
-          'fullScreen',
-          'thumbs',
-          'close'
-        ],
-        toolbar: true,
-        infinite: true,
-        keyboard: 'auto',
-        clickContent: 'zoom',
-        clickSlide: 'close',
-        // 防止双击放大
-        doubleClick: 'zoom',
-        // 确保只有一个实例
-        groupAll: false
-      });
+      Fancybox.bind('[data-fancybox="gallery"]');
     });
   }
 </script>

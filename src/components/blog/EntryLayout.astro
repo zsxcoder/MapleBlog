@@ -10,12 +10,11 @@ import AuthorImg from "@assets/picture.webp";
 import { Image } from "astro:assets";
 import LiquidGlassLess from "@components/common/LiquidGlassLess.astro";
 import Comment from "@components/base/Comment.astro";
-// 已移除点赞功能组件
 import ShareButton from "@components/blog/ShareButton.astro";
 import RecommendedReadCard from "@components/blog/RecommendedReadCard.astro";
 import type { BlogEntry } from "@/types";
 import { SITE_INFO, GITHUB_EDIT_CONFIG, LICENSE_CONFIG } from "@lib/config";
-// import License from "@components/misc/License.astro";
+import crypto from "crypto";
 
 interface Props {
   entry: CollectionEntry<"blog">;
@@ -23,9 +22,14 @@ interface Props {
 const isDev = import.meta.env.DEV;
 const { entry } = Astro.props;
 const isDraft = entry.data.draft;
-const { title, description, image, hideToc, updatedAt, author } = entry.data;
+const { title, description, image, hideToc, updatedAt, author, encrypted, password } = entry.data;
 
-// 从Astro的render()结果中获取处理好的headings
+const hashPassword = (input: string): string => {
+  return crypto.createHash("sha256").update(input).digest("hex");
+};
+
+const passwordHash = encrypted && password ? hashPassword(password) : undefined;
+
 const { headings } = await render(entry);
 
 const descriptionLenth = 200;
@@ -37,9 +41,7 @@ const actuallyHideToc =
   globalHideToc ||
   headings.filter((heading) => heading.depth <= tocDepth).length === 0;
 
-// 简化布局类计算
-const articleClass = "w-full lg:w-3/4 xl:w-4/5"; //因为侧边栏还有推荐阅读，所以不需要根据toc是否隐藏来计算宽度
-// const articleClass = actuallyHideToc ? "w-full" : "w-full lg:w-3/4 xl:w-4/5";
+const articleClass = "w-full lg:w-3/4 xl:w-4/5";
 const tocClass = actuallyHideToc
   ? "hidden"
   : "hidden md:flex md:w-1/4 lg:w-1/5";
@@ -48,7 +50,6 @@ const entryDescription =
   description ||
   (entry.body ? plainify(entry.body.slice(0, descriptionLenth)) : "");
 
-// 获取推荐文章
 const allBlogPosts = (await getCollection("blog", ({ data,filePath }) => {
   if(filePath?.includes("-index.md")){
     return false;
@@ -56,26 +57,22 @@ const allBlogPosts = (await getCollection("blog", ({ data,filePath }) => {
   return data.status === "published" && !data.draft;
 })) as BlogEntry[];
 
-// 过滤掉当前文章并获取推荐文章
 const currentTags = entry.data.tags || [];
 const currentCategories = entry.data.categories || [];
 
-// 基于标签和分类相似性推荐文章
 const recommendedPosts = allBlogPosts
-  .filter((post) => post.id !== entry.id) // 排除当前文章
+  .filter((post) => post.id !== entry.id)
   .map((post) => {
     let score = 0;
     const postTags = post.data.tags || [];
     const postCategories = post.data.categories || [];
 
-    // 标签匹配得分
-    const tagMatches = postTags.filter((tag) =>
+    const tagMatches = postTags.filter((tag: string) =>
       currentTags.includes(tag),
     ).length;
     score += tagMatches * 2;
 
-    // 分类匹配得分
-    const categoryMatches = postCategories.filter((cat) =>
+    const categoryMatches = postCategories.filter((cat: string | undefined) =>
       currentCategories.includes(cat),
     ).length;
     score += categoryMatches * 3;
@@ -83,7 +80,6 @@ const recommendedPosts = allBlogPosts
     return { post, score };
   })
   .sort((a, b) => {
-    // 先按相似度排序，再按发布时间排序
     if (b.score !== a.score) {
       return b.score - a.score;
     }
@@ -95,30 +91,27 @@ const recommendedPosts = allBlogPosts
     );
     return dateB.getTime() - dateA.getTime();
   })
-  .slice(0, 5) // 限制为5篇推荐文章
+  .slice(0, 5)
   .map((item) => item.post);
 ---
 
 <BaseLayout title={title} description={entryDescription} image={image?.src}>
-  <!-- 草稿提示 -->
-  {
-    isDraft && isDev && (
-      <section class="flex container px-3 lg:px-8">
-        <div class="bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 p-4 mb-6 w-full">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-5 w-5 text-yellow-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
+  {isDraft && isDev && (
+    <section class="flex container px-3 lg:px-8">
+      <div class="bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 p-4 mb-6 w-full">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-5 w-5 text-yellow-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
             <div class="ml-3">
               <p class="text-sm text-yellow-700 dark:text-yellow-200">
                 这是一篇草稿文章，仅在开发环境可见
@@ -126,9 +119,9 @@ const recommendedPosts = allBlogPosts
             </div>
           </div>
         </div>
-      </section>
-    )
-  }
+      </div>
+    </section>
+  )}
   <section class="flex container px-3 lg:px-8">
     <div class:list={[articleClass]}>
       <article>
@@ -144,115 +137,178 @@ const recommendedPosts = allBlogPosts
           />
         </section>
 
-        <!-- 移动端目录组件 -->
-        {!actuallyHideToc && (
-          <MobileTableOfContents headings={headings} tocDepth={tocDepth} />
-        )}
-
-        <!-- AISummary AI摘要 -->
-        {entry.data.summary && entry.data.ai !== false && (
-          <div class='aisummary-container'>
-            <div class='aisummary-title'>
-              <i class='aisummary-title-icon'>
-                <svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'>
-                  <title>机器人</title>
-                  <g stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
-                    <path d='M34.717885,5.03561087 C36.12744,5.27055371 37.079755,6.60373651 36.84481,8.0132786 L35.7944,14.3153359 L38.375,14.3153359 C43.138415,14.3153359 47,18.1768855 47,22.9402569 L47,34.4401516 C47,39.203523 43.138415,43.0650727 38.375,43.0650727 L9.625,43.0650727 C4.861585,43.0650727 1,39.203523 1,34.4401516 L1,22.9402569 C1,18.1768855 4.861585,14.3153359 9.625,14.3153359 L12.2056,14.3153359 L11.15519,8.0132786 C10.920245,6.60373651 11.87256,5.27055371 13.282115,5.03561087 C14.69167,4.80066802 16.024865,5.7529743 16.25981,7.16251639 L17.40981,14.0624532 C17.423955,14.1470924 17.43373,14.2315017 17.43948,14.3153359 L30.56052,14.3153359 C30.56627,14.2313867 30.576045,14.1470924 30.59019,14.0624532 L31.74019,7.16251639 C31.975135,5.7529743 33.30833,4.80066802 34.717885,5.03561087 Z M38.375,19.4902885 L9.625,19.4902885 C7.719565,19.4902885 6.175,21.0348394 6.175,22.9402569 L6.175,34.4401516 C6.175,36.3455692 7.719565,37.89012 9.625,37.89012 L38.375,37.89012 C40.280435,37.89012 41.825,36.3455692 41.825,34.4401516 L41.825,22.9402569 C41.825,21.0348394 40.280435,19.4902885 38.375,19.4902885 Z M14.8575,23.802749 C16.28649,23.802749 17.445,24.9612484 17.445,26.3902253 L17.445,28.6902043 C17.445,30.1191812 16.28649,31.2776806 14.8575,31.2776806 C13.42851,31.2776806 12.27,30.1191812 12.27,28.6902043 L12.27,26.3902253 C12.27,24.9612484 13.42851,23.802749 14.8575,23.802749 Z M33.1425,23.802749 C34.57149,23.802749 35.73,24.9612484 35.73,26.3902253 L35.73,28.6902043 C35.73,30.1191812 34.57149,31.2776806 33.1425,31.2776806 C31.71351,31.2776806 30.555,30.1191812 30.555,28.6902043 L30.555,26.3902253 C30.555,24.9612484 31.71351,23.802749 33.1425,23.802749 Z' fill='#444444' fill-rule='nonzero'></path>
-                  </g>
-                </svg>
-              </i>
-              <div class='aisummary-title-text'>AI 摘要</div>
-              <div class='aisummary-tag'>AI Generated</div>
-            </div>
-            <div class='aisummary-explanation' data-ai-summary={entry.data.summary}>{entry.data.summary}</div>
-            <div class='aisummary-disclaimer'>本摘要由AI生成，仅供参考，内容准确性请以原文为准。</div>
-          </div>
-        )}
-
-        <LiquidGlassLess
-          containerType="section"
-          heavy
-          wrapperClass="panel flex flex-col justify-between mb-4 rounded-[35px] intersect-no-queue min-h-96"
-        >
-          <div
-            class="p-3 lg:p-8 prose max-w-none markdown-content text-txt-p dark:text-darkmode-txt-p intersect:animate-fadeUp"
-          >
-            <slot />
-          </div>
-        </LiquidGlassLess>
-
-
-        <!-- 文章反馈与编辑区域 -->
-        <div class="mb-4 p-4 rounded-lg bg-[var(--license-block-bg)] border border-[var(--line-divider)] onload-animation">
-          <!-- 反馈区域 -->
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-              <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.75rem] text-white dark:text-black/70">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                  <path d="M12 17h.01"></path>
-                </svg>
-              </div>
-              <p class="text-black/80 dark:text-white/80 text-sm">这篇文章是否对你有帮助？</p>
-            </div>
-            <div class="flex gap-2">
-              <a href="/posts/pin/" class="group flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--btn-regular-bg)] hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)] text-[var(--btn-content)] text-xs font-medium transition-all active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] group-hover:scale-110 transition-transform">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                </svg>
-                联系
-              </a>
-              <a href="/donate/" class="group flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--primary)] hover:bg-[oklch(0.65_0.16_var(--hue))] active:bg-[oklch(0.60_0.18_var(--hue))] text-white dark:text-black/80 text-xs font-medium transition-all active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] group-hover:scale-110 transition-transform">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-                赞助
-              </a>
-            </div>
-          </div>
-
-          {GITHUB_EDIT_CONFIG.enable && (
-            <>
-              <!-- 分隔线 -->
-              <div class="border-t border-[var(--line-divider)] my-3"></div>
-
-              <!-- GitHub编辑区域 -->
-              <div class="flex items-start gap-3">
-                <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] text-white dark:text-black/70">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
+        <div id="encrypted-article" data-encrypted={encrypted ? "true" : "false"} class={encrypted ? "encrypted" : ""}>
+          {encrypted && (
+            <div class="password-lock-screen flex justify-center py-16" id="password-lock-screen">
+              <div class="glass rounded-[35px] p-8 w-full max-w-md text-center mx-4">
+                <div class="mb-6">
+                  <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--primary)]/20 flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="text-[var(--primary)]"
+                    >
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </div>
+                  <h2 class="text-2xl font-bold text-txt-p dark:text-darkmode-txt-p mb-2">
+                    文章已加密
+                  </h2>
+                  <p class="text-txt-light dark:text-darkmode-txt-light text-sm">
+                    请输入密码查看文章内容
+                  </p>
                 </div>
-                <div class="flex-1">
-                  <p class="text-black/80 dark:text-white/80 text-sm mb-1">发现错误或想要改进这篇文章？</p>
-                  <a
-                    href={`${GITHUB_EDIT_CONFIG.baseUrl}/${entry.id.replace('/blog/', '')}.md`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1 text-[var(--primary)] hover:text-[oklch(0.65_0.16_var(--hue))] text-sm font-medium transition-colors"
+
+                <form id="password-form" class="space-y-4" onsubmit="return false;">
+                  <div>
+                    <input
+                      type="password"
+                      id="password-input"
+                      placeholder="请输入密码"
+                      class="w-full glass rounded-[20px] px-5 py-3 text-txt-p dark:text-darkmode-txt-p placeholder:text-txt-light dark:placeholder:text-darkmode-txt-light focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
+                    />
+                    <p id="password-error" class="text-red-500 text-sm mt-2 flex items-center justify-center gap-1" style="display: none;">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                      </svg>
+                      密码错误，请重试
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    id="unlock-btn"
+                    class="w-full rounded-[20px] px-5 py-3 bg-[var(--primary)] text-white font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem]">
-                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                    </svg>
-                    在 GitHub 上编辑此页
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.75rem]">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                  </a>
-                </div>
+                    解锁文章
+                  </button>
+                </form>
               </div>
-            </>
+            </div>
           )}
+
+          <div id="article-content" class="encrypted-content">
+            <div class="encrypted-content">
+              <MobileTableOfContents headings={headings} tocDepth={tocDepth} />
+            </div>
+
+            {entry.data.summary && entry.data.ai !== false && (
+              <div class='aisummary-container'>
+                <div class='aisummary-title'>
+                  <i class='aisummary-title-icon'>
+                    <svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'>
+                      <title>机器人</title>
+                      <g stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+                        <path d='M34.717885,5.03561087 C36.12744,5.27055371 37.079755,6.60373651 36.84481,8.0132786 L35.7944,14.3153359 L38.375,14.3153359 C43.138415,14.3153359 47,18.1768855 47,22.9402569 L47,34.4401516 C47,39.203523 43.138415,43.0650727 38.375,43.0650727 L9.625,43.0650727 C4.861585,43.0650727 1,39.203523 1,34.4401516 L1,22.9402569 C1,18.1768855 4.861585,14.3153359 9.625,14.3153359 L12.2056,14.3153359 L11.15519,8.0132786 C10.920245,6.60373651 11.87256,5.27055371 13.282115,5.03561087 C14.69167,4.80066802 16.024865,5.7529743 16.25981,7.16251639 L17.40981,14.0624532 C17.423955,14.1470924 17.43373,14.2315017 17.43948,14.3153359 L30.56052,14.3153359 C30.56627,14.2313867 30.576045,14.1470924 30.59019,14.0624532 L31.74019,7.16251639 C31.975135,5.7529743 33.30833,4.80066802 34.717885,5.03561087 Z M38.375,19.4902885 L9.625,19.4902885 C7.719565,19.4902885 6.175,21.0348394 6.175,22.9402569 L6.175,34.4401516 C6.175,36.3455692 7.719565,37.89012 9.625,37.89012 L38.375,37.89012 C40.280435,37.89012 41.825,36.3455692 41.825,34.4401516 L41.825,22.9402569 C41.825,21.0348394 40.280435,19.4902885 38.375,19.4902885 Z M14.8575,23.802749 C16.28649,23.802749 17.445,24.9612484 17.445,26.3902253 L17.445,28.6902043 C17.445,30.1191812 16.28649,31.2776806 14.8575,31.2776806 C13.42851,31.2776806 12.27,30.1191812 12.27,28.6902043 L12.27,26.3902253 C12.27,24.9612484 13.42851,23.802749 14.8575,23.802749 Z M33.1425,23.802749 C34.57149,23.802749 35.73,24.9612484 35.73,26.3902253 L35.73,28.6902043 C35.73,30.1191812 34.57149,31.2776806 33.1425,31.2776806 C31.71351,31.2776806 30.555,30.1191812 30.555,28.6902043 L30.555,26.3902253 C30.555,24.9612484 31.71351,23.802749 33.1425,23.802749 Z' fill='#444444' fill-rule='nonzero'></path>
+                      </g>
+                    </svg>
+                  </i>
+                  <div class='aisummary-title-text'>AI 摘要</div>
+                  <div class='aisummary-tag'>AI Generated</div>
+                </div>
+                <div class='aisummary-explanation' data-ai-summary={entry.data.summary}>{entry.data.summary}</div>
+                <div class='aisummary-disclaimer'>本摘要由AI生成，仅供参考，内容准确性请以原文为准。</div>
+              </div>
+            )}
+
+            <LiquidGlassLess
+              containerType="section"
+              heavy
+              wrapperClass="panel flex flex-col justify-between mb-4 rounded-[35px] intersect-no-queue min-h-96"
+            >
+              <div
+                class="p-3 lg:p-8 prose max-w-none markdown-content text-txt-p dark:text-darkmode-txt-p intersect:animate-fadeUp"
+              >
+                <slot />
+              </div>
+            </LiquidGlassLess>
+
+
+            <div class="mb-4 p-4 rounded-lg bg-[var(--license-block-bg)] border border-[var(--line-divider)] onload-animation">
+              <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.75rem] text-white dark:text-black/70">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <path d="M12 17h.01"></path>
+                      </svg>
+                    </div>
+                    <p class="text-black/80 dark:text-white/80 text-sm">这篇文章是否对你有帮助？</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <a href="/posts/pin/" class="group flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--btn-regular-bg)] hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)] text-[var(--btn-content)] text-xs font-medium transition-all active:scale-95">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] group-hover:scale-110 transition-transform">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                      联系
+                    </a>
+                    <a href="/donate/" class="group flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--primary)] hover:bg-[oklch(0.65_0.16_var(--hue))] active:bg-[oklch(0.60_0.18_var(--hue))] text-white dark:text-black/80 text-xs font-medium transition-all active:scale-95">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] group-hover:scale-110 transition-transform">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                      </svg>
+                      赞助
+                    </a>
+                  </div>
+                </div>
+
+                {GITHUB_EDIT_CONFIG.enable && (
+                  <>
+                    <div class="border-t border-[var(--line-divider)] my-3"></div>
+                    <div class="flex items-start gap-3">
+                      <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem] text-white dark:text-black/70">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <p class="text-black/80 dark:text-white/80 text-sm mb-1">发现错误或想要改进这篇文章？</p>
+                        <a
+                          href={`${GITHUB_EDIT_CONFIG.baseUrl}/${entry.id.replace('/blog/', '')}.md`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="inline-flex items-center gap-1 text-[var(--primary)] hover:text-[oklch(0.65_0.16_var(--hue))] text-sm font-medium transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.875rem]">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                          </svg>
+                          在 GitHub 上编辑此页
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[0.75rem]">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+          </div>
         </div>
 
-        <!-- 文章信息区 -->
-        <!-- 文章底部信息卡片 -->
         <div class="relative mt-16">
-          <!-- 作者头像 - 超出顶部 -->
           <div
             class="left_centor -top-12 transform -translate-x-1/2 z-10 animate-fadeUp"
           >
@@ -277,19 +333,14 @@ const recommendedPosts = allBlogPosts
             wrapperClass="dock rounded-2xl pt-16 pb-8 px-8"
             textClass="intersect-no-queue"
           >
-            <!-- 作者信息 -->
             <div class="text-center m-6">
               <div
                 class="font-bold text-2xl text-txt-p dark:text-darkmode-txt-p mb-1"
               >
-                {author || "Maple"}
+                {author || "钟神秀"}
               </div>
-              <!-- <div class="text-sm text-txt-s dark:text-darkmode-txt-s opacity-80">
-                文章作者
-              </div> -->
             </div>
 
-            <!-- 互动按钮区域（已移除点赞） -->
             <div class="flex items-center justify-center gap-4 mb-2">
               <ShareButton
                 title={title}
@@ -299,15 +350,12 @@ const recommendedPosts = allBlogPosts
               />
             </div>
 
-            <!-- 分割线 -->
             <div
               class="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-2"
             >
             </div>
 
-            <!-- 文章信息 -->
             <div class="space-y-4 text-center">
-              <!-- 版权信息 -->
               <div
                 class="text-xs text-txt-p dark:text-darkmode-txt-p opacity-75 leading-relaxed"
               >
@@ -384,14 +432,16 @@ const recommendedPosts = allBlogPosts
       </article>
     </div>
 
-    <!--sidebar -->
     <div
       class="flex-col h-full sticky top-[4rem] ml-4 space-y-4 hidden lg:flex lg:w-1/4 xl:w-1/5"
     >
-      <TableOfContents headings={headings} tocDepth={tocDepth} />
+      <div class="sidebar-element">
+        <div class="encrypted-content">
+          <TableOfContents headings={headings} tocDepth={tocDepth} />
+        </div>
+      </div>
 
-      <!-- 评论区跳转按钮 -->
-      <div class="liquidGlass-wrapper button w-12 h-12 rounded-full">
+      <div class="liquidGlass-wrapper button w-12 h-12 rounded-full sidebar-go-to-comments sidebar-element">
         <div class="liquidGlass-effect-h"></div>
         <div class="liquidGlass-tint-h"></div>
         <div class="liquidGlass-shine"></div>
@@ -402,59 +452,123 @@ const recommendedPosts = allBlogPosts
         </button>
       </div>
 
-      <!-- 推荐阅读模块 -->
-      {
-        recommendedPosts.length > 0 && (
+      {recommendedPosts.length > 0 && (
+        <div class="sidebar-element">
           <LiquidGlassLess
-            heavy
-            wrapperClass="dock rounded-[25px] overflow-hidden mb-3"
-            textClass="intersect-no-queue"
-          >
-            <div class="py-2">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-txt-p dark:text-darkmode-txt-p flex items-center gap-2">
-                  <svg
-                    class="w-5 h-5 text-orange-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                    />
-                  </svg>
-                  推荐阅读
-                </h3>
-              </div>
-
-              <div class="space-y-1">
-                {recommendedPosts.map((post, index) => (
-                  <div
-                    class="intersect:animate-fadeUp"
-                    style={`animation-delay: ${index * 100}ms`}
-                  >
-                    <RecommendedReadCard
-                      entry={post}
-                      showImage={true}
-                      showReadingTime={true}
-                      compact={true}
-                    />
-                  </div>
-                ))}
-              </div>
+          heavy
+          wrapperClass="dock rounded-[25px] overflow-hidden mb-3"
+          textClass="intersect-no-queue"
+        >
+          <div class="py-2">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold text-txt-p dark:text-darkmode-txt-p flex items-center gap-2">
+                <svg
+                  class="w-5 h-5 text-orange-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                  />
+                </svg>
+                推荐阅读
+              </h3>
             </div>
-          </LiquidGlassLess>
-        )
-      }
+
+            <div class="space-y-1">
+              {recommendedPosts.map((post, index) => (
+                <div
+                  class="intersect:animate-fadeUp"
+                  style={`animation-delay: ${index * 100}ms`}
+                >
+                  <RecommendedReadCard
+                    entry={post}
+                    showImage={true}
+                    showReadingTime={true}
+                    compact={true}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </LiquidGlassLess>
+        </div>
+      )}
     </div>
   </section>
 </BaseLayout>
 
+<script define:vars={{ passwordHash }}>
+  (function() {
+    const input = document.getElementById('password-input');
+    const errorEl = document.getElementById('password-error');
+    const btn = document.getElementById('unlock-btn');
+    const lockScreen = document.getElementById('password-lock-screen');
+    const articleContent = document.getElementById('article-content');
+
+    if (!input || !errorEl || !btn || !lockScreen || !articleContent) return;
+
+    async function hashPassword(text) {
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) {
+        console.error('Hash error:', e);
+        return '';
+      }
+    }
+
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const password = input.value;
+      if (!password) return;
+
+      btn.textContent = '验证中...';
+      btn.disabled = true;
+      errorEl.style.display = 'none';
+
+      try {
+        const hash = await hashPassword(password);
+        if (hash === passwordHash) {
+          lockScreen.style.display = 'none';
+          articleContent.classList.add('unlocked');
+          document.getElementById('encrypted-article').classList.add('unlocked');
+          document.querySelectorAll('.encrypted-content').forEach(el => {
+            el.classList.add('unlocked');
+          });
+        } else {
+          errorEl.style.display = 'flex';
+          input.value = '';
+          btn.textContent = '解锁文章';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        errorEl.textContent = '验证失败，请重试';
+        errorEl.style.display = 'flex';
+        btn.textContent = '解锁文章';
+        btn.disabled = false;
+      }
+    });
+
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+  })();
+</script>
+
 <style>
-  /* 评论区跳转按钮样式 */
   #go-to-comments-btn {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -469,72 +583,60 @@ const recommendedPosts = allBlogPosts
     visibility: hidden;
     transform: scale(0.8);
   }
+
+  .encrypted-content {
+    display: none;
+  }
+
+  .encrypted-content.unlocked {
+    display: block;
+  }
+
+  #encrypted-article.encrypted:not(.unlocked) ~ * .sidebar-element {
+    display: none;
+  }
 </style>
 
 <script>
-  // 评论区跳转按钮功能
   let goToCommentsBtn = document.getElementById('go-to-comments-btn');
 
   function refreshControlRefs() {
     goToCommentsBtn = document.getElementById('go-to-comments-btn');
-    console.log('refreshControlRefs called:', goToCommentsBtn);
   }
 
-  // 点击按钮跳转到评论区
+  function handleGoToComments() {
+    const commentsSection = document.getElementById('tcomment') ||
+                           document.querySelector('#tcomment') ||
+                           document.querySelector('.twikoo');
+    if (commentsSection) {
+      commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const rect = commentsSection.getBoundingClientRect();
+      window.scrollTo({
+        top: window.pageYOffset + rect.top - 100,
+        behavior: 'smooth'
+      });
+    }
+  }
+
   function setupGoToCommentsBtn() {
     refreshControlRefs();
-
     if (goToCommentsBtn) {
-      console.log('setupGoToCommentsBtn called, adding event listener');
-      // 先移除可能存在的事件监听器，避免重复添加
       goToCommentsBtn.removeEventListener('click', handleGoToComments);
-      // 添加新的事件监听器
       goToCommentsBtn.addEventListener('click', handleGoToComments);
     }
   }
 
-  // 点击事件处理函数
-  function handleGoToComments() {
-    console.log('Button clicked, trying to find comments section');
-    // 尝试多种方式找到评论区
-    const commentsSection = document.getElementById('tcomment') ||
-                           document.querySelector('#tcomment') ||
-                           document.querySelector('.twikoo');
-    console.log('Found comments section:', commentsSection);
-    if (commentsSection) {
-      console.log('Scrolling to comments section');
-      // 使用更可靠的滚动方法
-      commentsSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-      // 同时使用window.scrollTo作为备选方案
-      const rect = commentsSection.getBoundingClientRect();
-      window.scrollTo({
-        top: window.pageYOffset + rect.top - 100, // 减去100px，避免被导航栏遮挡
-        behavior: 'smooth'
-      });
-    } else {
-      console.log('Comments section not found');
-    }
-  }
-
-  // 初始化
   function init() {
-    console.log('init called');
     setupGoToCommentsBtn();
   }
 
-  // 使用Astro特定的事件
   document.addEventListener('astro:page-load', init);
 
-  // 同时保留标准事件，确保兼容性
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  // 添加页面加载完成后的延迟初始化，确保所有元素都已渲染
   setTimeout(init, 1000);
 </script>

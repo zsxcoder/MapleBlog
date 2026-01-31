@@ -1,5 +1,12 @@
 // Markdown相关的前端工具函数
 
+// 扩展 Window 接口以包含自定义方法
+declare global {
+  interface Window {
+    copyCode: (button: HTMLElement) => void;
+  }
+}
+
 /**
  * 将图片转化为/_image?href=http://xxxx.com格式
  * @param url - 原始图片URL
@@ -11,12 +18,6 @@ export function transformImageUrl(url: string): string {
 
 // 仅在客户端执行的代码
 if (typeof window !== 'undefined') {
-  // 扩展 Window 接口以包含自定义方法
-  declare global {
-    interface Window {
-      copyCode: (button: HTMLElement) => void;
-    }
-  }
 
   /**
    * 复制代码功能

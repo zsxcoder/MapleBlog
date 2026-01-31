@@ -74,6 +74,9 @@ const blog = defineCollection({
       draft: z.boolean().default(false),
       ai: z.boolean().default(true),
       summary: z.string().optional(),
+      // 加密文章支持
+      encrypted: z.boolean().default(false),
+      password: z.string().optional(),
     }),
 });
 

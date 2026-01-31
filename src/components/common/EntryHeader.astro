@@ -17,13 +17,13 @@ import {
   FaRegClock,
   FaRegEye,
 } from "react-icons/fa";
-import type { GenericEntry, EntryReference, ImageData } from "@/types";
+import type { GenericEntry, EntryReference } from "@/types";
 import LiquidGlassLess from "./LiquidGlassLess.astro";
 import Notice from "./shortcodes/Notice";
 
 interface EntryData {
   title: string;
-  image?: string;
+  image?: any;
   imageAlt?: string;
   author?: EntryReference;
   createdAt?: string;
@@ -90,21 +90,40 @@ tags?.sort((a: string, b: string) => a.localeCompare(b));
         {image && showImage && (
           <div class="absolute inset-0">
             {typeof image === "string" ? (
-              // 处理外链图片
+              // 处理外链图片或本地文件路径
               <img
                 class="w-full h-full object-cover rounded-[35px]"
                 src={image}
                 alt={imageAlt || ""}
                 loading="eager"
               />
+            ) : image && typeof image === "object" && "src" in image ? (
+              // 检查 image.src 是否是本地文件路径
+              typeof image.src === "string" && image.src.startsWith('/') ? (
+                // 处理本地文件路径
+                <img
+                  class="w-full h-full object-cover rounded-[35px]"
+                  src={image.src}
+                  alt={imageAlt || ""}
+                  loading="eager"
+                />
+              ) : (
+                // 处理 Astro 图像对象
+                <Image
+                  class="w-full h-full object-cover rounded-[35px]"
+                  src={image}
+                  alt={imageAlt || ""}
+                  height={280}
+                  width={1200}
+                  loading="eager"
+                />
+              )
             ) : (
-              // 处理本地图片
-              <Image
+              // 处理其他情况
+              <img
                 class="w-full h-full object-cover rounded-[35px]"
                 src={image}
                 alt={imageAlt || ""}
-                height={280}
-                width={1200}
                 loading="eager"
               />
             )}

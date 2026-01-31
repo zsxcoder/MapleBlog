@@ -3,6 +3,7 @@ title: 在MapleBlog中实现AI摘要功能
 description: 详细介绍如何在MapleBlog Astro博客中添加AI摘要功能，包括API配置、代码集成、样式适配和使用方法
 createdAt: 2026-01-29
 updatedAt: 2026-01-30
+image: "https://cdn.jsdmirror.com/gh/zsxcoder/github-img@main/img/ai-summary.avif"
 categories:
   - 技术
   - 博客优化

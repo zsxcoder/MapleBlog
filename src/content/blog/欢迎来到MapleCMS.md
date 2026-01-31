@@ -6,7 +6,7 @@ updatedAt: 2025-11-17
 categories:
   - 使用说明
 author: Maple
-image: "@assets/uploads/demo.jpg"
+image: "https://img.314926.xyz/h"
 tags:
   - 文章
   - 示例

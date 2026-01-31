@@ -2,9 +2,8 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import pLimit from 'p-limit'
 
-import links from '../public/data/friends.json' with { type: 'json' }
-
 const DATA_PATH = path.resolve('public/data/friends.json')
+const links = require('../public/data/friends.json')
 const CHECK_TIMEOUT = 15000
 const PLimit_NUM = 5
 const MAX_RETRIES = 3
