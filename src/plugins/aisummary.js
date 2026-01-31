@@ -184,9 +184,16 @@ function initializeAISummary() {
  */
 (function ensureInit() {
   document.removeEventListener('DOMContentLoaded', initializeAISummary);
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeAISummary);
   } else {
     initializeAISummary();
   }
+
+  // 监听 Astro 视图转换事件，确保页面切换后也能正确初始化
+  document.addEventListener('astro:page-load', () => {
+    aisummaryIsRunning = false;
+    initializeAISummary();
+  });
 })();
