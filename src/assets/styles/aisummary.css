@@ -8,6 +8,7 @@
     margin: 1.25rem 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    will-change: opacity, transform;
 }
 
 .aisummary-container:hover {
@@ -47,12 +48,24 @@
     border-radius: 0.5rem;
     border: 1px solid hsl(var(--border) / 0.6);
     font-size: 0.9375rem;
-    line-height: 1.6;
-    display: block;
+    line-height: 1.8;
+    display: none;
     position: relative;
     overflow: visible;
     max-height: none !important;
     will-change: contents;
+}
+
+.aisummary-explanation.visible {
+    display: block;
+}
+
+.typing-text {
+    display: inline;
+}
+
+.typing-text::after {
+    content: '';
 }
 
 .aisummary-explanation::before {
@@ -122,6 +135,37 @@
     -webkit-animation: blinking-cursor 0.5s infinite;
     margin-left: 0.25rem;
     border-radius: 1px;
+}
+
+.typing-cursor {
+    background-color: hsl(var(--primary));
+    width: 2px;
+    height: 1.2em;
+    display: inline-block;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    border-radius: 2px;
+    animation: cursor-blink 1s step-end infinite;
+    -webkit-animation: cursor-blink 1s step-end infinite;
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+}
+
+@keyframes cursor-blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+@-webkit-keyframes cursor-blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }
 
 @keyframes blinking-cursor {

@@ -29,6 +29,11 @@ const aisummary = {
   aiShowAnimation(text) {
     const element = document.querySelector('.aisummary-explanation');
     if (!element || !text) return;
+
+    // 重置状态，确保每次刷新都执行动画
+    aisummaryIsRunning = false;
+    element.innerHTML = '';
+
     if (aisummaryIsRunning) return;
 
     // 不启用动画时直接渲染
@@ -36,59 +41,110 @@ const aisummary = {
       element.innerHTML = text;
       element.style.maxHeight = 'none';
       element.style.overflow = 'visible';
+      element.classList.add('visible');
       return;
     }
 
     aisummaryIsRunning = true;
-    const TYPING_DELAY = 25;
-    const PUNCTUATION_MULT = 6;
+
+    // 打字机动画配置 - 更流畅的参数
+    const TYPING_DELAY = 30; // 基础打字速度 (毫秒)
+    const PUNCTUATION_DELAY = 150; // 标点符号停顿时间
+    const FAST_TYPING_DELAY = 15; // 快速打字时的延迟
+
+    // 添加容器淡入动画
+    const container = document.querySelector('.aisummary-container');
+    if (container) {
+      container.style.opacity = '0';
+      container.style.transform = 'translateY(10px)';
+      container.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+      requestAnimationFrame(() => {
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+      });
+    }
 
     element.style.display = 'block';
+    element.classList.add('visible');
     element.style.maxHeight = 'none';
     element.style.overflow = 'visible';
-    element.innerHTML = '生成中...' + '<span class="blinking-cursor"></span>';
+    element.innerHTML = '<span class="typing-text"></span><span class="typing-cursor"></span>';
 
-    let animationRunning = true;
+    const typingTextEl = element.querySelector('.typing-text');
+    const typingCursorEl = element.querySelector('.typing-cursor');
+
     let currentIndex = 0;
     let lastUpdateTime = performance.now();
-    let started = false;
+    let isTypingPunctuation = false;
 
     const animate = () => {
-      if (currentIndex < text.length && animationRunning) {
+      if (currentIndex < text.length && aisummaryIsRunning) {
         const currentTime = performance.now();
-        const timeDiff = currentTime - lastUpdateTime;
-        const letter = text.slice(currentIndex, currentIndex + 1);
-        const isPunctuation = /[，。！、？,.!?]/.test(letter);
-        const delay = isPunctuation ? TYPING_DELAY * PUNCTUATION_MULT : TYPING_DELAY;
+        const letter = text[currentIndex];
+        const isPunctuation = /[，。！？、,.!?]/.test(letter);
+        const isNewline = letter === '\n';
 
-        if (timeDiff >= delay) {
+        // 计算延迟时间
+        let delay = isPunctuation ? PUNCTUATION_DELAY : TYPING_DELAY;
+
+        // 连续输入时加快速度
+        if (currentIndex > 10 && !isPunctuation && !isNewline) {
+          delay = FAST_TYPING_DELAY;
+        }
+
+        if (currentTime - lastUpdateTime >= delay) {
           lastUpdateTime = currentTime;
-          currentIndex++;
-          if (currentIndex < text.length) {
-            element.innerHTML = text.slice(0, currentIndex) + '<span class="blinking-cursor"></span>';
+
+          // 处理换行
+          if (isNewline) {
+            typingTextEl.innerHTML += '<br>';
           } else {
-            element.innerHTML = text;
-            element.style.display = 'block';
+            // 处理特殊字符的HTML转义
+            const escapedLetter = letter
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+            typingTextEl.innerHTML += escapedLetter;
+          }
+
+          currentIndex++;
+
+          // 动画完成
+          if (currentIndex >= text.length) {
             aisummaryIsRunning = false;
-            observer.disconnect();
+            typingCursorEl.style.opacity = '0';
+            if (observer && container) observer.unobserve(container);
+            return;
           }
         }
         requestAnimationFrame(animate);
       }
     };
 
-    // 进入视口时才运行动画，提高性能
+    if (!container) return;
+
+    // 使用 IntersectionObserver 进入视口时触发动画
     const observer = new IntersectionObserver((entries) => {
       const isVisible = entries[0].isIntersecting;
-      animationRunning = isVisible;
-      if (animationRunning && !started) {
-        started = true;
-        setTimeout(() => requestAnimationFrame(animate), 200);
+      if (isVisible) {
+        requestAnimationFrame(animate);
+        observer.unobserve(container);
       }
-    }, { threshold: 0 });
+    }, { threshold: 0.1 });
 
-    const container = document.querySelector('.aisummary-container');
-    if (container) observer.observe(container);
+    observer.observe(container);
+
+    // 如果元素已经在视口中，立即开始动画
+    if (container.offsetParent !== null) {
+      const rect = container.getBoundingClientRect();
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+      if (isInViewport) {
+        observer.unobserve(container);
+        requestAnimationFrame(animate);
+      }
+    }
   }
 };
 

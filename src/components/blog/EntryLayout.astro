@@ -207,10 +207,8 @@ const recommendedPosts = allBlogPosts
             </div>
           )}
 
-          <div id="article-content" class="encrypted-content">
-            <div class="encrypted-content">
-              <MobileTableOfContents headings={headings} tocDepth={tocDepth} />
-            </div>
+          <div id="article-content">
+            <MobileTableOfContents headings={headings} tocDepth={tocDepth} />
 
             {entry.data.summary && entry.data.ai !== false && (
               <div class='aisummary-container'>
@@ -243,8 +241,7 @@ const recommendedPosts = allBlogPosts
               </div>
             </LiquidGlassLess>
 
-
-            <div class="mb-4 p-4 rounded-lg bg-[var(--license-block-bg)] border border-[var(--line-divider)] onload-animation">
+            <div class="encrypted-content-wrapper mb-4 p-4 rounded-lg bg-[var(--license-block-bg)] border border-[var(--line-divider)] onload-animation">
               <div class="flex items-center justify-between mb-4">
                   <div class="flex items-center gap-3">
                     <div class="h-5 w-5 rounded bg-[var(--primary)] flex items-center justify-center">
@@ -304,7 +301,7 @@ const recommendedPosts = allBlogPosts
                     </div>
                   </>
                 )}
-              </div>
+            </div>
           </div>
         </div>
 
@@ -435,10 +432,8 @@ const recommendedPosts = allBlogPosts
     <div
       class="flex-col h-full sticky top-[4rem] ml-4 space-y-4 hidden lg:flex lg:w-1/4 xl:w-1/5"
     >
-      <div class="sidebar-element">
-        <div class="encrypted-content">
-          <TableOfContents headings={headings} tocDepth={tocDepth} />
-        </div>
+      <div class="sidebar-element encrypted-sidebar">
+        <TableOfContents headings={headings} tocDepth={tocDepth} />
       </div>
 
       <div class="liquidGlass-wrapper button w-12 h-12 rounded-full sidebar-go-to-comments sidebar-element">
@@ -508,9 +503,14 @@ const recommendedPosts = allBlogPosts
     const errorEl = document.getElementById('password-error');
     const btn = document.getElementById('unlock-btn');
     const lockScreen = document.getElementById('password-lock-screen');
-    const articleContent = document.getElementById('article-content');
+    const encryptedArticle = document.getElementById('encrypted-article');
 
-    if (!input || !errorEl || !btn || !lockScreen || !articleContent) return;
+    if (!encryptedArticle) return;
+
+    const isEncrypted = encryptedArticle.dataset.encrypted === 'true';
+    if (!isEncrypted) return;
+
+    if (!input || !errorEl || !btn || !lockScreen) return;
 
     async function hashPassword(text) {
       try {
@@ -540,11 +540,7 @@ const recommendedPosts = allBlogPosts
         const hash = await hashPassword(password);
         if (hash === passwordHash) {
           lockScreen.style.display = 'none';
-          articleContent.classList.add('unlocked');
-          document.getElementById('encrypted-article').classList.add('unlocked');
-          document.querySelectorAll('.encrypted-content').forEach(el => {
-            el.classList.add('unlocked');
-          });
+          encryptedArticle.classList.add('unlocked');
         } else {
           errorEl.style.display = 'flex';
           input.value = '';
@@ -584,15 +580,19 @@ const recommendedPosts = allBlogPosts
     transform: scale(0.8);
   }
 
-  .encrypted-content {
+  .encrypted-content-wrapper,
+  #encrypted-article.encrypted:not(.unlocked) .encrypted-content-wrapper,
+  #encrypted-article.encrypted:not(.unlocked) > LiquidGlassLess {
     display: none;
   }
 
-  .encrypted-content.unlocked {
+  #encrypted-article.unlocked .encrypted-content-wrapper,
+  #encrypted-article.unlocked > LiquidGlassLess {
     display: block;
   }
 
-  #encrypted-article.encrypted:not(.unlocked) ~ * .sidebar-element {
+  #encrypted-article.encrypted:not(.unlocked) ~ * .encrypted-sidebar,
+  #encrypted-article.encrypted:not(.unlocked) ~ * .sidebar-go-to-comments {
     display: none;
   }
 </style>
