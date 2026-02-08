@@ -23,7 +23,7 @@
       "status": "active",
       "category_code": "tech",
       "sort_order": 1,
-      "responseTime": 559
+      "responseTime": 133
     },
     {
       "id": "2",
@@ -34,7 +34,7 @@
       "status": "active",
       "category_code": "tech",
       "sort_order": 2,
-      "responseTime": 101
+      "responseTime": 55
     },
     {
       "id": "3",
@@ -45,7 +45,7 @@
       "status": "active",
       "category_code": "life",
       "sort_order": 1,
-      "responseTime": 101
+      "responseTime": 55
     }
   ]
 }
